@@ -80,7 +80,7 @@ module.exports = [
       radix: 'error', // Enforce using the radix parameter with parseInt()
       // 'require-await': 'error', // Disallow async functions without await
       '@typescript-eslint/no-unused-vars': 'off', // Allow unused variables in test files
-      '@typescript-eslint/no-unsafe-call': 'warn',
+      '@typescript-eslint/no-unsafe-call': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
