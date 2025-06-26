@@ -1,0 +1,27 @@
+{
+  "workbench.colorCustomizations": {
+    "commandCenter.border": "#15202b99",
+    "sash.hoverBorder": "#ffb603",
+    "statusBar.background": "#cf9300",
+    "statusBar.foreground": "#15202b",
+    "statusBarItem.hoverBackground": "#9c6f00",
+    "statusBarItem.remoteBackground": "#cf9300",
+    "statusBarItem.remoteForeground": "#15202b",
+    "tab.activeBorder": "#ffb603",
+    "titleBar.activeBackground": "#cf9300",
+    "titleBar.activeForeground": "#15202b",
+    "titleBar.inactiveBackground": "#cf930099",
+    "titleBar.inactiveForeground": "#15202b99"
+  },
+  "peacock.color": "#CF9300",
+  "editor.formatOnSave": true,
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}
