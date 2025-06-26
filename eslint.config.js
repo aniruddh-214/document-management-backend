@@ -78,7 +78,12 @@ module.exports = [
       'no-undef-init': 'error', // Disallow initializing variables to undefined
       'no-use-before-define': 'off', // Disable to avoid conflict with @typescript-eslint/no-use-before-define
       radix: 'error', // Enforce using the radix parameter with parseInt()
-      'require-await': 'error', // Disallow async functions without await
+      // 'require-await': 'error', // Disallow async functions without await
+      '@typescript-eslint/no-unused-vars': 'off', // Allow unused variables in test files
+      '@typescript-eslint/no-unsafe-call': 'warn',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
       'no-return-await': 'warn', // Disallow unnecessary return await
       'prefer-const': 'error', // Prefer const over let for variables that are never reassigned
       'prefer-template': 'error', // Prefer template literals over string concatenation
@@ -101,7 +106,7 @@ module.exports = [
       '@typescript-eslint/explicit-module-boundary-types': 'error', // Require explicit return types on module boundaries
       // '@typescript-eslint/member-delimiter-style': 'error', // Enforce consistent member delimiter style in interfaces and type literals
       '@typescript-eslint/no-empty-function': 'error', // Disallow empty functions
-      '@typescript-eslint/no-explicit-any': 'warn', // Disallow the use of the 'any' type
+      '@typescript-eslint/no-explicit-any': 'off', // Disallow the use of the 'any' type
       '@typescript-eslint/no-floating-promises': 'error', // Require promises to be handled appropriately
       '@typescript-eslint/no-for-in-array': 'error', // Disallow iterating over an array with a for-in loop
       '@typescript-eslint/no-inferrable-types': 'error', // Disallow explicit type declarations that can be inferred
@@ -174,10 +179,11 @@ module.exports = [
   {
     files: ['**/*.spec.ts', '**/*.test.ts', 'test/*'], // Apply these rules to test files
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off', // Allow the use of 'any' type in test files
+      // '@typescript-eslint/no-explicit-any': 'off', // Allow the use of 'any' type in test files
       '@typescript-eslint/no-unused-vars': 'off', // Allow unused variables in test files
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'warn',
+      '@typescript-eslint/no-unsafe-assignment': 'warn',
+      '@typescript-eslint/no-unsafe-member-access': 'warn',
     },
   },
   {

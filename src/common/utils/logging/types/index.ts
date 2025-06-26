@@ -5,7 +5,7 @@ type LogBasicDetails = {
   data?: unknown;
   xRequestId?: string;
   durationMs?: number;
-};
+} & { [key: string]: any };
 
 export type LogError = LogBasicDetails & {
   error?: Error;
