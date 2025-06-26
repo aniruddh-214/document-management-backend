@@ -21,6 +21,7 @@ lib-cov
 
 # Coverage directory used by tools like istanbul
 coverage
+test_reports
 *.lcov
 
 # nyc test coverage
@@ -128,6 +129,8 @@ dist
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 
+
+!test/.env
 # yarn v2
 .yarn/cache
 .yarn/unplugged
