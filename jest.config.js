@@ -1,5 +1,5 @@
 const dotenv = require('dotenv');
-const path =require('path');
+const path = require('path');
 
 dotenv.config({ path: './test/.env' });
 
@@ -44,10 +44,7 @@ const config = {
 
   coverageDirectory: '<rootDir>/test_reports/',
 
-  coveragePathIgnorePatterns: [
-    '<rootDir>/src/main.ts',
-    '<rootDir>/src/types',
-  ],
+  coveragePathIgnorePatterns: ['<rootDir>/src/main.ts', '<rootDir>/src/types'],
 
   coverageThreshold: {
     global: {
