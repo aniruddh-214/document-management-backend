@@ -1,3 +1,4 @@
+import { UserAuthTokenPayload } from '../auth/interfaces/jwtPayload.interface';
 import LoggerService from '../common/utils/logging/loggerService';
 
 // Extend Express.Request with custom properties

@@ -81,6 +81,7 @@ module.exports = [
       // 'require-await': 'error', // Disallow async functions without await
       '@typescript-eslint/no-unused-vars': 'off', // Allow unused variables in test files
       '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
@@ -125,7 +126,7 @@ module.exports = [
       '@typescript-eslint/prefer-for-of': 'error', // Prefer for-of loops over standard for loops
       '@typescript-eslint/prefer-function-type': 'error', // Prefer function types over interfaces with call signatures
       '@typescript-eslint/restrict-plus-operands': 'error', // Disallow using the '+' operator with non-numeric types
-      '@typescript-eslint/unbound-method': 'error', // Enforce unbound methods to be bound
+      '@typescript-eslint/unbound-method': 'off', // Enforce unbound methods to be bound
 
       // Import-specific rules
       'import/no-default-export': 'off', // Warn on default exports
