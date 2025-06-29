@@ -21,9 +21,9 @@
     "with-test-env": "dotenv -e ./test/.env --",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "migrate:generate": "typeorm-ts-node-commonjs migration:generate ./src/migrations/Refactor -d ./src/config/typeorm.config.ts",
-    "migrate:run": "DEBUG=typeorm:*  typeorm-ts-node-commonjs migration:run -d ./src/config/typeorm.config.ts",
+    "migrate:run": "cross-env DEBUG=typeorm:*  typeorm-ts-node-commonjs migration:run -d ./src/config/typeorm.config.ts",
     "migrate:create": "typeorm-ts-node-commonjs migration:create ./src/migrations/PostRefactoring",
-    "migrate:revert": "DEBUG=typeorm:*  typeorm-ts-node-commonjs migration:revert -d ./src/config/typeorm.config.ts",
+    "migrate:revert": "cross-env DEBUG=typeorm:*  typeorm-ts-node-commonjs migration:revert -d ./src/config/typeorm.config.ts",
     "shell": "ts-node -P ./tsconfig.json"
   },
   "dependencies": {
@@ -63,6 +63,7 @@
     "@types/supertest": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^8.35.0",
     "@typescript-eslint/parser": "^8.35.0",
+    "cross-env": "^7.0.3",
     "dotenv-cli": "^8.0.0",
     "eslint": "^9.29.0",
     "eslint-config-prettier": "^10.1.5",

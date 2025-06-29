@@ -6,11 +6,11 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 
-import { JwtTokenService } from '../services/jwt.service';
+import { JsonWebToken } from '../../common/utils/jsonwebtoken.util';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private readonly _jwtTokenService: JwtTokenService) {}
+  constructor(private readonly _jwt: JsonWebToken) {}
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
@@ -23,7 +23,7 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     try {
-      request.user = this._jwtTokenService.verifyToken(token);
+      request.user = this._jwt.verifyJwtToken(token);
       return true;
     } catch (error) {
       logger.logWarn({

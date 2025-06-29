@@ -9,7 +9,7 @@ import { Request } from 'express';
 
 import UserRoleEnum from '../../common/enums/role.enum';
 import { ROLES_KEY } from '../decorators/roles.decorator';
-import { UserAuthTokenPayload } from '../types/jwtPayload.interface';
+import { UserAuthTokenPayload } from '../interfaces/jwtPayload.interface';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
