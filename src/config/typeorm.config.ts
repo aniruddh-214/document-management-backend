@@ -24,10 +24,12 @@ export const typeOrmConfig: DataSourceOptions = {
     ENV.NODE_ENV === 'production'
       ? ['dist/migrations/*.js'] // Use compiled JS in prod
       : ['src/migrations/*.ts'], // Use TS files during development
-
-  cache: {
-    duration: 60000, // 1 minute and this is the db level caching we can use redis as well
+  extra: {
+    max: 10,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
   },
+
   maxQueryExecutionTime: 1000, //if query take   1 second then console
 };
 

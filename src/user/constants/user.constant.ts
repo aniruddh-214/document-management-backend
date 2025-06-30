@@ -1,6 +1,7 @@
 // user.constants.ts
 
 import UserRoleEnum from '../../common/enums/role.enum';
+import UserEntity from '../entities/user.entity';
 
 export const validRoles = Object.values(UserRoleEnum).filter(
   (r) => r !== UserRoleEnum.ADMIN,
@@ -67,3 +68,15 @@ export const USER_CONSTANTS = {
     VALID_ROLES: validRoles,
   },
 };
+
+export const userEntityKeys: Array<keyof UserEntity> = [
+  'id',
+  'email',
+  'fullName',
+  'role',
+  'createdAt',
+  'updatedAt',
+  'isActive',
+  'isDeleted',
+  'lastLogin',
+];

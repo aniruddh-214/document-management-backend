@@ -115,8 +115,7 @@ export default class LoggerService {
   private _logLabels(logInfo: LogDetails): LogLabels {
     return {
       requestId: this._requestId,
-      action: logInfo.action,
-      source: logInfo.source,
+      ...logInfo,
     };
   }
 

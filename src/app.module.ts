@@ -6,10 +6,16 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import { typeOrmConfig } from './config/typeorm.config';
+import { DocumentModule } from './document/document.module';
 import { UserModule } from './user/user.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(typeOrmConfig), AuthModule, UserModule],
+  imports: [
+    TypeOrmModule.forRoot(typeOrmConfig),
+    AuthModule,
+    UserModule,
+    DocumentModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

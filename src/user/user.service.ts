@@ -22,6 +22,8 @@ import UserRoleEnum from '../common/enums/role.enum';
 import { SimpleResponseType } from '../common/types/response/genericMessage.type';
 import BcryptUtil from '../common/utils/bcrypt.util';
 import LoggerService from '../common/utils/logging/loggerService';
+import { DocumentService } from '../document/document.service';
+import { DocumentEntity } from '../document/entities/document.entity';
 
 import GetAllUsersDto from './dtos/getAllUsers.dto';
 import UserEntity from './entities/user.entity';
@@ -33,12 +35,14 @@ import { CreateUserResponseType } from './types/response/createUser.type';
 
 @Injectable()
 export default class UserService {
-  constructor(
+  public constructor(
     @InjectRepository(UserEntity)
-    private readonly userRepo: Repository<UserEntity>,
+    private readonly _userRepo: Repository<UserEntity>,
+
+    private readonly _documentService: DocumentService,
   ) {}
 
-  async createUser(
+  public async createUser(
     body: CreateUserRequestType,
     logger: LoggerService,
   ): Promise<CreateUserResponseType> {
@@ -57,7 +61,7 @@ export default class UserService {
     });
 
     try {
-      const result: InsertResult = await this.userRepo
+      const result: InsertResult = await this._userRepo
         .createQueryBuilder()
         .insert()
         .into(UserEntity)
@@ -88,7 +92,7 @@ export default class UserService {
     }
   }
 
-  async findUserBy(
+  public async findUserBy(
     logger: LoggerService,
     options: FindOneOptions<UserEntity>,
   ): Promise<UserEntity> {
@@ -99,7 +103,7 @@ export default class UserService {
     });
 
     try {
-      const user = await this.userRepo.findOne(options);
+      const user = await this._userRepo.findOne(options);
 
       if (!user) {
         throw new NotFoundException('User not found');
@@ -118,7 +122,7 @@ export default class UserService {
     }
   }
 
-  async updateUserBy(
+  public async updateUserBy(
     condition: FindOptionsWhere<UserEntity>,
     updates: QueryDeepPartialEntity<UserEntity>,
     logger: LoggerService,
@@ -130,7 +134,7 @@ export default class UserService {
     });
 
     try {
-      return await this.userRepo.update(condition, updates);
+      return await this._userRepo.update(condition, updates);
     } catch (error) {
       logger.logError({
         message: 'Error while updating the user',
@@ -143,7 +147,7 @@ export default class UserService {
     }
   }
 
-  async getAllUsers(
+  public async getAllUsers(
     logger: LoggerService,
     queryParams: GetAllUsersDto,
   ): Promise<{ data: UserEntity[]; total: number }> {
@@ -159,7 +163,7 @@ export default class UserService {
       sortOrder,
     } = queryParams;
 
-    const query = this.userRepo.createQueryBuilder('user');
+    const query = this._userRepo.createQueryBuilder('user');
     query.withDeleted();
     const columns = select?.map((field) => `user.${field}`);
     query.select(columns);
@@ -202,12 +206,12 @@ export default class UserService {
     return { data, total };
   }
 
-  async getUserById(
+  public async getUserById(
     logger: LoggerService,
     id: string,
   ): Promise<UserEntity | null> {
     try {
-      const user = await this.userRepo.findOne({
+      const user = await this._userRepo.findOne({
         where: { id, role: Not(UserRoleEnum.ADMIN) },
         select: {
           id: true,
@@ -248,7 +252,7 @@ export default class UserService {
     }
   }
 
-  async updateUserDetails(
+  public async updateUserDetails(
     logger: LoggerService,
     params: UpdateUserDetailsRequestParamsType,
     body: UpdateUserDetailsRequestBodyType,
@@ -260,7 +264,7 @@ export default class UserService {
         throw new Error('Cannot assign admin role');
       }
 
-      const updateResult = await this.userRepo.update(
+      const updateResult = await this._userRepo.update(
         { id, role: Not(UserRoleEnum.ADMIN) },
         body,
       );
@@ -304,12 +308,12 @@ export default class UserService {
     }
   }
 
-  async deleteUserById(
+  public async deleteUserById(
     logger: LoggerService,
     id: string,
   ): Promise<SimpleResponseType> {
     try {
-      const result = await this.userRepo.update(
+      const result = await this._userRepo.update(
         {
           id,
           role: Not(UserRoleEnum.ADMIN),
@@ -356,5 +360,12 @@ export default class UserService {
         'Something went wrong while deleting the user',
       );
     }
+  }
+
+  public async getUserDocuments(
+    logger: LoggerService,
+    userId: string,
+  ): Promise<DocumentEntity[]> {
+    return this._documentService.getUserDocuments(logger, userId);
   }
 }

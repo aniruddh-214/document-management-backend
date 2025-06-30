@@ -1,3 +1,5 @@
+/// <reference path="./types/globals.d.ts" />
+
 import 'dotenv/config';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
