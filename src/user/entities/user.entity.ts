@@ -1,7 +1,8 @@
-import { Entity, Unique, Column, Index } from 'typeorm';
+import { Entity, Unique, Column, Index, OneToMany } from 'typeorm';
 
 import ModelTemplate from '../../common/entities/modelTemplate.entity';
 import UserRoleEnum from '../../common/enums/role.enum';
+import { DocumentEntity } from '../../document/entities/document.entity';
 
 @Entity({ name: 'users' })
 @Unique('idx_email', ['email'])
@@ -25,4 +26,7 @@ export default class UserEntity extends ModelTemplate {
   @Index()
   @Column({ name: 'last_login', type: 'timestamp', nullable: true })
   lastLogin?: Date;
+
+  @OneToMany(() => DocumentEntity, (document) => document.user)
+  public documents: DocumentEntity[];
 }

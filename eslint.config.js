@@ -127,6 +127,9 @@ module.exports = [
       '@typescript-eslint/prefer-function-type': 'error', // Prefer function types over interfaces with call signatures
       '@typescript-eslint/restrict-plus-operands': 'error', // Disallow using the '+' operator with non-numeric types
       '@typescript-eslint/unbound-method': 'off', // Enforce unbound methods to be bound
+      '@typescript-eslint/triple-slash-reference': 'off',
+      '@typescript-eslint/import/default': 'off',
+      '@typescript-eslint/import/no-named-as-default': 'off',
 
       // Import-specific rules
       'import/no-default-export': 'off', // Warn on default exports

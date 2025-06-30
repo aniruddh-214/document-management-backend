@@ -7,7 +7,9 @@ declare global {
     interface Request {
       user: UserAuthTokenPayload; // This will be available only after the use of  auth guards otherwise undefined
       logger: LoggerService;
-      files: any;
+      context: Record<string, any>;
     }
   }
 }
+
+export {};

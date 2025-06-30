@@ -18,6 +18,7 @@ import { RolesGuard } from '../auth/guards/role.guard';
 import UserRoleEnum from '../common/enums/role.enum';
 import { RequestValidationPipe } from '../common/pipes/zodValidation.pipe';
 import { SimpleResponseType } from '../common/types/response/genericMessage.type';
+import { DocumentEntity } from '../document/entities/document.entity';
 
 import GetAllUsersDto from './dtos/getAllUsers.dto';
 import {
@@ -84,5 +85,13 @@ export default class UserController {
     @Param() param: DeleteUserRequestParamType,
   ): Promise<SimpleResponseType> {
     return this._userService.deleteUserById(req.logger, param.id);
+  }
+
+  @Get('/me/documents')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR)
+  @UsePipes(new RequestValidationPipe(UsersSchema.shape.getUserDocuments))
+  getUserAllDocuments(@Req() req: Request): Promise<DocumentEntity[]> {
+    return this._userService.getUserDocuments(req.logger, req.user.sub);
   }
 }
