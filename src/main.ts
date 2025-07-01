@@ -14,6 +14,7 @@ import ENV from './config/env.config';
 const bootstrap = async (): Promise<void> => {
   const app = await NestFactory.create(AppModule);
   const logger = GlobalAppLogger();
+  app.enableShutdownHooks();
 
   app.enableCors({
     origin: '*', // have to keep frontend  e.g. ['https://domain.com']

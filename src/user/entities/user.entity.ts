@@ -3,6 +3,7 @@ import { Entity, Unique, Column, Index, OneToMany } from 'typeorm';
 import ModelTemplate from '../../common/entities/modelTemplate.entity';
 import UserRoleEnum from '../../common/enums/role.enum';
 import { DocumentEntity } from '../../document/entities/document.entity';
+import { IngestionEntity } from '../../ingestion/entities/ingestion.entity';
 
 @Entity({ name: 'users' })
 @Unique('idx_email', ['email'])
@@ -29,4 +30,7 @@ export default class UserEntity extends ModelTemplate {
 
   @OneToMany(() => DocumentEntity, (document) => document.user)
   public documents: DocumentEntity[];
+
+  @OneToMany(() => IngestionEntity, (ingestion) => ingestion.user)
+  public ingestions: IngestionEntity[];
 }

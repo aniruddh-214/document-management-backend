@@ -118,7 +118,7 @@ export default class UserService {
         errorMessage: error?.message,
       });
 
-      throw new InternalServerErrorException('Failed to find user');
+      throw error;
     }
   }
 
@@ -150,7 +150,11 @@ export default class UserService {
   public async getAllUsers(
     queryParams: GetAllUsersDto,
     logger: LoggerService,
-  ): Promise<{ data: UserEntity[]; total: number }> {
+  ): Promise<{
+    data: UserEntity[];
+    totalCount: number;
+    totalPages: number;
+  }> {
     const {
       select,
       fullName,
@@ -203,7 +207,7 @@ export default class UserService {
       source: 'UserService#getAllUsers',
     });
 
-    return { data, total };
+    return { data, totalCount: total, totalPages: Math.ceil(total / limit) };
   }
 
   public async getUserById(
