@@ -58,7 +58,7 @@ export class AuthService {
     if (!user) {
       logger.logError({
         message: `User not found with email: ${email}`,
-        action: 'unauthorized',
+        action: 'error',
         source: 'AuthService#login',
       });
       throw new NotFoundException('User not found');
@@ -72,7 +72,7 @@ export class AuthService {
     if (!isPasswordValid) {
       logger.logError({
         message: 'Invalid password',
-        action: 'unauthorized',
+        action: 'error',
         source: 'AuthService#login',
       });
       throw new UnauthorizedException('Invalid credentials');

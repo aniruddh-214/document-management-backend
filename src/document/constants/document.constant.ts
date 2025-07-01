@@ -5,7 +5,6 @@ export const DOCUMENT_CONSTANTS = {
     INVALID_INPUT: 'Invalid Input',
     INVALID_DOCUMENT_ID: 'Invalid Document ID',
     EXCEED_LIMIT: 'Exceed Input Limit',
-    INVALID_DOCUMENT_STATUS: 'Invalid Document Status',
   },
 };
 

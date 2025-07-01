@@ -1,6 +1,5 @@
 import { DatabaseSortingOrder } from '../../common/enums/dbOrderSort.enum';
 import { DocumentEntity } from '../entities/document.entity';
-import DocumentStatusEnum from '../enums/documentStatus.enum';
 import { GetAllDocumentsRequestQueryType } from '../schemas/request/document.schema';
 
 export default class GetAllDocumentsDto {
@@ -10,13 +9,11 @@ export default class GetAllDocumentsDto {
     'description',
     'fileName',
     'mimeType',
-    'documentStatus',
     'size',
   ];
 
   public title?: string;
   public mimeType?: string;
-  public documentStatus?: DocumentStatusEnum[];
 
   public isActive?: boolean;
   public isDeleted?: boolean;
@@ -31,7 +28,6 @@ export default class GetAllDocumentsDto {
       select,
       title,
       mimeType,
-      documentStatus,
       isActive,
       isDeleted,
       page,
@@ -45,7 +41,6 @@ export default class GetAllDocumentsDto {
 
     this.title = title;
     this.mimeType = mimeType;
-    this.documentStatus = documentStatus as DocumentStatusEnum[];
 
     this.isActive = isActive;
     this.isDeleted = isDeleted;

@@ -8,7 +8,6 @@ import {
   documentEntityKeys,
 } from '../../constants/document.constant';
 import { DocumentEntity } from '../../entities/document.entity';
-import DocumentStatusEnum from '../../enums/documentStatus.enum';
 
 const { INVALID_INPUT } = DOCUMENT_CONSTANTS.ZOD;
 
@@ -100,33 +99,6 @@ export const DocumentSchema = z.object({
           {
             message: USER_CONSTANTS.REQUEST.VALIDATION_MESSAGES.PAGE_INVALID,
           },
-        ),
-      documentStatus: z
-        .string()
-        .trim()
-        .min(1, { message: DOCUMENT_CONSTANTS.ZOD.INVALID_INPUT })
-        .optional()
-        .transform((val) =>
-          val
-            ? Array.from(
-                new Set(
-                  val
-                    .split(',')
-                    .map((s) => s.trim().toLowerCase())
-                    .filter(Boolean),
-                ),
-              )
-            : undefined,
-        )
-        .refine(
-          (statuses) =>
-            !statuses?.length ||
-            statuses.every((s) =>
-              Object.values(DocumentStatusEnum).includes(
-                s as DocumentStatusEnum,
-              ),
-            ),
-          { message: DOCUMENT_CONSTANTS.ZOD.INVALID_DOCUMENT_STATUS },
         ),
       limit: z
         .string()

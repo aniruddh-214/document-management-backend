@@ -93,8 +93,8 @@ export default class UserService {
   }
 
   public async findUserBy(
-    logger: LoggerService,
     options: FindOneOptions<UserEntity>,
+    logger: LoggerService,
   ): Promise<UserEntity> {
     logger.logInfo({
       action: 'info',
@@ -148,8 +148,8 @@ export default class UserService {
   }
 
   public async getAllUsers(
-    logger: LoggerService,
     queryParams: GetAllUsersDto,
+    logger: LoggerService,
   ): Promise<{ data: UserEntity[]; total: number }> {
     const {
       select,
@@ -207,8 +207,8 @@ export default class UserService {
   }
 
   public async getUserById(
-    logger: LoggerService,
     id: string,
+    logger: LoggerService,
   ): Promise<UserEntity | null> {
     try {
       const user = await this._userRepo.findOne({
@@ -253,9 +253,9 @@ export default class UserService {
   }
 
   public async updateUserDetails(
-    logger: LoggerService,
     params: UpdateUserDetailsRequestParamsType,
     body: UpdateUserDetailsRequestBodyType,
+    logger: LoggerService,
   ): Promise<SimpleResponseType> {
     const { id } = params;
 
@@ -309,8 +309,8 @@ export default class UserService {
   }
 
   public async deleteUserById(
-    logger: LoggerService,
     id: string,
+    logger: LoggerService,
   ): Promise<SimpleResponseType> {
     try {
       const result = await this._userRepo.update(
@@ -363,8 +363,8 @@ export default class UserService {
   }
 
   public async getUserDocuments(
-    logger: LoggerService,
     userId: string,
+    logger: LoggerService,
   ): Promise<DocumentEntity[]> {
     return this._documentService.getUserDocuments(logger, userId);
   }

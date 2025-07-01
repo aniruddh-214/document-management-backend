@@ -2,11 +2,8 @@ import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 
 import ModelTemplate from '../../common/entities/modelTemplate.entity';
 import UserEntity from '../../user/entities/user.entity';
-import DocumentStatusEnum from '../enums/documentStatus.enum';
 
 @Index('idx_documents_user_id', ['userId'])
-@Index('idx_documents_status', ['documentStatus'])
-@Index('idx_documents_user_status', ['userId', 'documentStatus'])
 @Index('idx_documents_created_at', ['createdAt'])
 @Entity('documents')
 export class DocumentEntity extends ModelTemplate {
@@ -27,14 +24,6 @@ export class DocumentEntity extends ModelTemplate {
 
   @Column({ type: 'int', nullable: false })
   size: number;
-
-  @Column({
-    name: 'document_status',
-    type: 'enum',
-    enum: DocumentStatusEnum,
-    default: DocumentStatusEnum.PENDING,
-  })
-  documentStatus: DocumentStatusEnum;
 
   @Column({ name: 'user_id', type: 'uuid', nullable: false })
   public userId: string;

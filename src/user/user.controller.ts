@@ -47,7 +47,7 @@ export default class UserController {
 
     @Query() query: GetAllUSersRequestQueryType,
   ): Promise<GetAllUsersResponseType> {
-    return this._userService.getAllUsers(req.logger, new GetAllUsersDto(query));
+    return this._userService.getAllUsers(new GetAllUsersDto(query), req.logger);
   }
 
   // Route to get single user detail
@@ -59,7 +59,7 @@ export default class UserController {
     @Req() req: Request,
     @Param() param: GetUserRequestParamType,
   ): Promise<GetUserByIdResponseType | null> {
-    return this._userService.getUserById(req.logger, param.id);
+    return this._userService.getUserById(param.id, req.logger);
   }
 
   // Route to update user roles
@@ -72,7 +72,7 @@ export default class UserController {
     @Param() param: UpdateUserDetailsRequestParamsType,
     @Body() body: UpdateUserDetailsRequestBodyType,
   ): Promise<SimpleResponseType> {
-    return this._userService.updateUserDetails(req.logger, param, body);
+    return this._userService.updateUserDetails(param, body, req.logger);
   }
 
   // Route to soft delete user
@@ -84,7 +84,7 @@ export default class UserController {
     @Req() req: Request,
     @Param() param: DeleteUserRequestParamType,
   ): Promise<SimpleResponseType> {
-    return this._userService.deleteUserById(req.logger, param.id);
+    return this._userService.deleteUserById(param.id, req.logger);
   }
 
   @Get('/me/documents')
@@ -92,6 +92,6 @@ export default class UserController {
   @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR)
   @UsePipes(new RequestValidationPipe(UsersSchema.shape.getUserDocuments))
   getUserAllDocuments(@Req() req: Request): Promise<DocumentEntity[]> {
-    return this._userService.getUserDocuments(req.logger, req.user.sub);
+    return this._userService.getUserDocuments(req.user.sub, req.logger);
   }
 }
