@@ -264,7 +264,6 @@ export class DocumentService {
         size: true,
         updatedAt: true,
         createdAt: true,
-        documentStatus: true,
       },
     });
 
@@ -389,7 +388,6 @@ export class DocumentService {
       select,
       title,
       mimeType,
-      documentStatus,
       isActive,
       isDeleted,
       page,
@@ -421,12 +419,6 @@ export class DocumentService {
       if (mimeType) {
         query.andWhere('document.mime_type ILIKE :mimeType', {
           mimeType: `%${mimeType}%`,
-        });
-      }
-
-      if (documentStatus?.length) {
-        query.andWhere('document.document_status IN (:...statuses)', {
-          statuses: documentStatus,
         });
       }
 

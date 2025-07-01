@@ -1,8 +1,8 @@
 {
   "name": "document-management-backend",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "This is the test task",
+  "author": "Aniruddh Gupta",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

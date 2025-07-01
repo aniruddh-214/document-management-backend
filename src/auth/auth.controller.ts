@@ -49,7 +49,7 @@ export class AuthController {
   @Get('logout')
   @UseGuards(JwtAuthGuard)
   public logout(): { message: string } {
-    // Since backend can't invalid the token we can you other ways if intentionally want
+    // Since backend can't invalid the token we can use other ways if intentionally want
     return { message: 'Successfully logged out' };
   }
 
