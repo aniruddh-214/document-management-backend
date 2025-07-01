@@ -7,7 +7,9 @@ import { AuthModule } from './auth/auth.module';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import { typeOrmConfig } from './config/typeorm.config';
 import { DocumentModule } from './document/document.module';
+import { IngestionModule } from './ingestion/ingestion.module';
 import { UserModule } from './user/user.module';
+import { AppShutdownService } from './utils/application.shutdown';
 
 @Module({
   imports: [
@@ -15,9 +17,10 @@ import { UserModule } from './user/user.module';
     AuthModule,
     UserModule,
     DocumentModule,
+    IngestionModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AppShutdownService],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer): void {

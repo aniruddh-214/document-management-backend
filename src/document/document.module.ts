@@ -11,6 +11,6 @@ import { DocumentEntity } from './entities/document.entity';
   imports: [TypeOrmModule.forFeature([DocumentEntity])],
   controllers: [DocumentController],
   providers: [JsonWebToken, DocumentService],
-  exports: [DocumentService],
+  exports: [TypeOrmModule, DocumentService],
 })
 export class DocumentModule {}

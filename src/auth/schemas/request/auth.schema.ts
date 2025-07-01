@@ -20,7 +20,7 @@ export const AuthSchema = z.object({
       email: z
         .string()
         .email({ message: VALIDATION_MESSAGES.INVALID_EMAIL })
-        .refine((value): string => value.toLowerCase()),
+        .transform((value) => value.toLowerCase().trim()),
 
       password: z
         .string()
@@ -37,7 +37,7 @@ export const AuthSchema = z.object({
       email: z
         .string()
         .email({ message: VALIDATION_MESSAGES.INVALID_EMAIL })
-        .refine((value): string => value.toLowerCase()),
+        .transform((value) => value.toLowerCase().trim()),
       password: z.string(),
     }),
   }),

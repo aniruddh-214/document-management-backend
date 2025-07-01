@@ -1,6 +1,14 @@
-import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  Index,
+  OneToMany,
+} from 'typeorm';
 
 import ModelTemplate from '../../common/entities/modelTemplate.entity';
+import { IngestionEntity } from '../../ingestion/entities/ingestion.entity';
 import UserEntity from '../../user/entities/user.entity';
 
 @Index('idx_documents_user_id', ['userId'])
@@ -31,4 +39,7 @@ export class DocumentEntity extends ModelTemplate {
   @ManyToOne(() => UserEntity, (user) => user.documents, { nullable: false })
   @JoinColumn({ name: 'user_id' })
   public user: UserEntity;
+
+  @OneToMany(() => IngestionEntity, (ingestion) => ingestion.document)
+  ingestions: IngestionEntity[];
 }

@@ -53,7 +53,8 @@ export class DocumentController {
     @Query() query: GetAllDocumentsRequestQueryType,
   ): Promise<{
     data: DocumentEntity[];
-    total: number;
+    totalCount: number;
+    totalPages: number;
   }> {
     return this.documentService.getAllDocuments(
       req.logger,
@@ -61,7 +62,7 @@ export class DocumentController {
     );
   }
   @Post('upload')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR)
   @UsePipes(new RequestValidationPipe(DocumentSchema.shape.uploadDocument))
   @UseInterceptors(

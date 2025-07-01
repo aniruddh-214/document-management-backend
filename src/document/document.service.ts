@@ -299,7 +299,7 @@ export class DocumentService {
 
     const dbUpdateTask = this._documentRepo.update(
       { id: document.id },
-      { isDeleted: true, isActive: false },
+      { isDeleted: true, isActive: false, deletedAt: Date.now() },
     );
 
     const [fileResult, dbResult] = await Promise.allSettled([
@@ -377,7 +377,11 @@ export class DocumentService {
   public async getAllDocuments(
     logger: LoggerService,
     filters: GetAllDocumentsRequestQueryType,
-  ): Promise<{ data: DocumentEntity[]; total: number }> {
+  ): Promise<{
+    data: DocumentEntity[];
+    totalCount: number;
+    totalPages: number;
+  }> {
     logger.logInfo({
       action: 'info',
       message: 'Fetching documents with filters',
@@ -443,7 +447,7 @@ export class DocumentService {
         source: 'DocumentService#getAllDocuments',
       });
 
-      return { data, total };
+      return { data, totalCount: total, totalPages: Math.ceil(total / limit) };
     } catch (error) {
       logger.logError({
         action: 'get_all_documents',

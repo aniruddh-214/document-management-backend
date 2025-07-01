@@ -44,16 +44,20 @@ export class AuthService {
       source: 'AuthService#login',
     });
 
-    const user = await this._userService.findUserBy(logger, {
-      where: {
-        email,
+    const user = await this._userService.findUserBy(
+      {
+        where: {
+          email,
+          isDeleted: false,
+        },
+        select: {
+          id: true,
+          password: true,
+          role: true,
+        },
       },
-      select: {
-        id: true,
-        password: true,
-        role: true,
-      },
-    });
+      logger,
+    );
 
     if (!user) {
       logger.logError({
@@ -104,15 +108,18 @@ export class AuthService {
     userId: string,
     logger: LoggerService,
   ): Promise<Partial<UserEntity>> {
-    const user = await this._userService.findUserBy(logger, {
-      where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        lastLogin: true,
+    const user = await this._userService.findUserBy(
+      {
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          lastLogin: true,
+        },
       },
-    });
+      logger,
+    );
 
     if (!user) {
       throw new NotFoundException('User not found');
