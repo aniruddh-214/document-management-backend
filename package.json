@@ -25,7 +25,8 @@
     "migrate:run": "cross-env DEBUG=typeorm:* typeorm-ts-node-commonjs migration:run -d ./src/config/typeorm.config.ts",
     "migrate:create": "typeorm-ts-node-commonjs migration:create ./src/migrations/PostRefactoring",
     "migrate:revert": "cross-env DEBUG=typeorm:*  typeorm-ts-node-commonjs migration:revert -d ./src/config/typeorm.config.ts",
-    "shell": "ts-node -P ./tsconfig.json"
+    "shell": "ts-node -P ./tsconfig.json",
+    "database:seed": "pnpm shell src/scripts/main.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.3",
