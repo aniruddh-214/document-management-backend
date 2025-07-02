@@ -3,6 +3,7 @@
 import 'dotenv/config';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 
 import { AppModule } from './app.module';
@@ -35,6 +36,17 @@ const bootstrap = async (): Promise<void> => {
   );
 
   app.useGlobalFilters(new AllExceptionsFilter(logger));
+
+  // Swagger Setup
+  const config = new DocumentBuilder()
+    .setTitle('Document Management Backend System')
+    .setDescription('API docs for document management system')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('docs', app, document); // Swagger UI at /docs
 
   await app.listen(ENV.PORT, () => {
     logger.logInfo({

@@ -17,7 +17,7 @@ export const typeOrmConfig: DataSourceOptions = {
   synchronize: false,
 
   // Enable logging based on environment or debugging need
-  logging: ENV.NODE_ENV !== 'production',
+  logging: false,
 
   // Migrations: use JS files in production, TS files in dev
   migrations:

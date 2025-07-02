@@ -1,37 +1,29 @@
 import {
   Injectable,
-  ConflictException,
   InternalServerErrorException,
   NotFoundException,
-  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FindOneOptions,
   FindOptionsWhere,
-  InsertResult,
   Not,
-  QueryFailedError,
   Repository,
   UpdateResult,
 } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
-import { CreateUserRequestType } from '../auth/schemas/request/auth.schema';
+import { UserAuthTokenPayload } from '../auth/interfaces/jwtPayload.interface';
 import UserRoleEnum from '../common/enums/role.enum';
 import { SimpleResponseType } from '../common/types/response/genericMessage.type';
-import BcryptUtil from '../common/utils/bcrypt.util';
 import LoggerService from '../common/utils/logging/loggerService';
 import { DocumentService } from '../document/document.service';
-import { DocumentEntity } from '../document/entities/document.entity';
 
 import GetAllUsersDto from './dtos/getAllUsers.dto';
+import GetUserDocumentsDTO from './dtos/getUserDocuements.dto';
 import UserEntity from './entities/user.entity';
-import {
-  UpdateUserDetailsRequestBodyType,
-  UpdateUserDetailsRequestParamsType,
-} from './schemas/request/user.schema';
-import { CreateUserResponseType } from './types/response/createUser.type';
+import { UpdateUserDetailsRequestBodyType } from './schemas/request/user.schema';
+import { GetUserDocumentsResponseType } from './types/response/getUserDocuments.type';
 
 @Injectable()
 export default class UserService {
@@ -43,53 +35,19 @@ export default class UserService {
   ) {}
 
   public async createUser(
-    body: CreateUserRequestType,
+    user: Partial<UserEntity>,
     logger: LoggerService,
-  ): Promise<CreateUserResponseType> {
-    const hashedPassword = await BcryptUtil.hashPassword(body.password);
-
-    const user = {
-      ...body,
-      role: UserRoleEnum.VIEWER,
-      password: hashedPassword,
-    };
-
+  ): Promise<UserEntity> {
     logger.logInfo({
       action: 'info',
-      message: `Saving user into database with email: ${user.email}`,
+      message: `Creating user with: ${JSON.stringify(user)}`,
       source: 'UserService#createUser',
     });
 
-    try {
-      const result: InsertResult = await this._userRepo
-        .createQueryBuilder()
-        .insert()
-        .into(UserEntity)
-        .values(user)
-        .returning(['id', 'role'])
-        .execute();
+    const userEntity = this._userRepo.create(user);
+    const savedUser = await this._userRepo.save(userEntity);
 
-      const insertedUser = result.raw[0];
-
-      return {
-        id: insertedUser.id,
-        role: insertedUser.role,
-      };
-    } catch (error) {
-      logger.logError({
-        message: 'error while creating the user',
-        action: 'error',
-        source: 'UserService#createUser',
-        errorMessage: error?.message,
-      });
-      if (
-        error instanceof QueryFailedError &&
-        error.driverError?.code === '23505'
-      ) {
-        throw new ConflictException('Email already in use');
-      }
-      throw new InternalServerErrorException('Failed to create user');
-    }
+    return savedUser;
   }
 
   public async findUserBy(
@@ -155,81 +113,91 @@ export default class UserService {
     totalCount: number;
     totalPages: number;
   }> {
-    const {
-      select,
-      fullName,
-      email,
-      role,
-      isActive,
-      isDeleted,
-      page,
-      limit,
-      sortOrder,
-    } = queryParams;
+    try {
+      const {
+        select,
+        fullName,
+        email,
+        role,
+        isDeleted,
+        page,
+        limit,
+        sortOrder,
+      } = queryParams;
 
-    const query = this._userRepo.createQueryBuilder('user');
-    query.withDeleted();
-    const columns = select?.map((field) => `user.${field}`);
-    query.select(columns);
+      const query = this._userRepo.createQueryBuilder('user');
+      query.withDeleted();
+      const columns = select?.map((field) => `user.${field}`);
+      query.select(columns);
 
-    if (fullName) {
-      query.andWhere('user.full_name ILIKE :name', { name: `%${fullName}%` });
+      if (fullName) {
+        query.andWhere('user.full_name ILIKE :name', { name: `%${fullName}%` });
+      }
+
+      if (email) {
+        query.andWhere('user.email ILIKE :email', { email: `%${email}%` });
+      }
+
+      if (role?.length) {
+        query.andWhere('user.role IN (:...roles)', { roles: role });
+      }
+
+      if (typeof isDeleted === 'boolean') {
+        if (isDeleted) {
+          query.andWhere('user.deleted_at IS NOT NULL');
+        } else {
+          query.andWhere('user.deleted_at IS NULL');
+        }
+      }
+
+      query.andWhere('user.role != :excludedRole', { excludedRole: 'admin' });
+
+      query
+        .orderBy(`user.created_at`, sortOrder)
+        .skip((+page - 1) * +limit)
+        .take(+limit);
+
+      const [data, total] = await query.getManyAndCount();
+
+      logger.logInfo({
+        action: 'info',
+        message: `Fetched ${data.length} users (Page ${page})`,
+        source: 'UserService#getAllUsers',
+      });
+
+      return { data, totalCount: total, totalPages: Math.ceil(total / limit) };
+    } catch (error) {
+      logger.logError({
+        action: 'error',
+        source: 'UserService#getAllUsers',
+        message: `Error while getting all users with filter: ${JSON.stringify(queryParams)}`,
+        errorMessage: (error as Error).message,
+      });
+      throw error;
     }
-
-    if (email) {
-      query.andWhere('user.email ILIKE :email', { email: `%${email}%` });
-    }
-
-    if (role?.length) {
-      query.andWhere('user.role IN (:...roles)', { roles: role });
-    }
-
-    if (typeof isActive !== 'undefined') {
-      query.andWhere('user.is_active = :isActive', { isActive });
-    }
-
-    if (typeof isDeleted !== 'undefined') {
-      query.andWhere('user.is_deleted = :isDeleted', { isDeleted });
-    }
-
-    query.andWhere('user.role != :excludedRole', { excludedRole: 'admin' });
-
-    query
-      .orderBy(`user.created_at`, sortOrder)
-      .skip((+page - 1) * +limit)
-      .take(+limit);
-
-    const [data, total] = await query.getManyAndCount();
-
-    logger.logInfo({
-      action: 'info',
-      message: `Fetched ${data.length} users (Page ${page})`,
-      source: 'UserService#getAllUsers',
-    });
-
-    return { data, totalCount: total, totalPages: Math.ceil(total / limit) };
   }
 
   public async getUserById(
     id: string,
     logger: LoggerService,
-  ): Promise<UserEntity | null> {
+  ): Promise<UserEntity> {
     try {
       const user = await this._userRepo.findOne({
         where: { id, role: Not(UserRoleEnum.ADMIN) },
         select: {
-          id: true,
           createdAt: true,
           updatedAt: true,
-          isActive: true,
-          isDeleted: true,
           deletedAt: true,
           fullName: true,
           email: true,
           role: true,
-          lastLogin: true,
+          version: true,
         },
       });
+
+      if (!user) {
+        throw new NotFoundException('User not found by provided ID');
+      }
 
       logger.logInfo({
         action: 'info',
@@ -246,7 +214,6 @@ export default class UserService {
         error,
       });
 
-      // Re-throw known Nest exceptions, wrap others
       if (error instanceof NotFoundException) {
         throw error;
       }
@@ -257,12 +224,10 @@ export default class UserService {
   }
 
   public async updateUserDetails(
-    params: UpdateUserDetailsRequestParamsType,
+    id: string,
     body: UpdateUserDetailsRequestBodyType,
     logger: LoggerService,
   ): Promise<SimpleResponseType> {
-    const { id } = params;
-
     try {
       if ('role' in body && body.role === UserRoleEnum.ADMIN) {
         throw new Error('Cannot assign admin role');
@@ -274,12 +239,7 @@ export default class UserService {
       );
 
       if (updateResult.affected === 0) {
-        logger.logInfo({
-          action: 'info',
-          message: `No user updated, either not found or admin user: ${id}`,
-          source: 'UserService#updateUserDetails',
-        });
-        throw new Error(
+        throw new NotFoundException(
           `User with id ${id} not found or cannot update admin user`,
         );
       }
@@ -299,10 +259,7 @@ export default class UserService {
         error,
       });
 
-      if (
-        error instanceof BadRequestException ||
-        error instanceof NotFoundException
-      ) {
+      if (error instanceof NotFoundException) {
         throw error;
       }
 
@@ -317,26 +274,9 @@ export default class UserService {
     logger: LoggerService,
   ): Promise<SimpleResponseType> {
     try {
-      const result = await this._userRepo.update(
-        {
-          id,
-          role: Not(UserRoleEnum.ADMIN),
-          isDeleted: false,
-        },
-        {
-          isDeleted: true,
-          deletedAt: new Date(),
-          isActive: false,
-        },
-      );
+      const result = await this._userRepo.softDelete({ id });
 
       if (result.affected === 0) {
-        logger.logInfo({
-          action: 'info',
-          message: `User not deleted (not found, already deleted, or is admin): ${id}`,
-          source: 'UserService#deleteUserById',
-        });
-
         throw new NotFoundException(
           `User with ID ${id} not found, already deleted, or is an admin`,
         );
@@ -367,9 +307,19 @@ export default class UserService {
   }
 
   public async getUserDocuments(
-    userId: string,
+    user: UserAuthTokenPayload,
+    query: GetUserDocumentsDTO,
     logger: LoggerService,
-  ): Promise<DocumentEntity[]> {
-    return this._documentService.getUserDocuments(logger, userId);
+  ): Promise<GetUserDocumentsResponseType> {
+    if (user.role === UserRoleEnum.ADMIN) {
+      // Admin can check own or others' documents
+      query.id = query?.id || user.sub;
+      query.needToIncludeFilePath = true;
+    } else {
+      // Non-admins can only access their own documents
+      query.id = user.sub;
+    }
+
+    return this._documentService.getUserDocuments(query, logger);
   }
 }

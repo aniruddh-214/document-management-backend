@@ -15,22 +15,26 @@ import { Request } from 'express';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/role.guard';
+import { SwaggerDoc } from '../common/decorators/swagger.decorator';
 import UserRoleEnum from '../common/enums/role.enum';
 import { RequestValidationPipe } from '../common/pipes/zodValidation.pipe';
 import { SimpleResponseType } from '../common/types/response/genericMessage.type';
-import { DocumentEntity } from '../document/entities/document.entity';
 
 import GetAllUsersDto from './dtos/getAllUsers.dto';
+import GetUserDocumentsDTO from './dtos/getUserDocuements.dto';
 import {
   DeleteUserRequestParamType,
   GetAllUSersRequestQueryType,
+  GetUserDocumentsRequestQueryType,
   GetUserRequestParamType,
   UpdateUserDetailsRequestBodyType,
   UpdateUserDetailsRequestParamsType,
   UsersSchema,
 } from './schemas/request/user.schema';
+import { USER_SWAGGER_SCHEMA } from './schemas/userSwagger.schema';
 import { GetAllUsersResponseType } from './types/response/getAllUsers.type';
 import { GetUserByIdResponseType } from './types/response/getUser.type';
+import { GetUserDocumentsResponseType } from './types/response/getUserDocuments.type';
 import UserService from './user.service';
 
 @Controller('user')
@@ -39,12 +43,12 @@ export default class UserController {
 
   // Route to get all users details based on filter and pagination
   @Get('all')
+  @SwaggerDoc(USER_SWAGGER_SCHEMA.GET_ALL_USERS)
   @Roles(UserRoleEnum.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UsePipes(new RequestValidationPipe(UsersSchema.shape.getAllUsers))
   public async getAllUsers(
     @Req() req: Request,
-
     @Query() query: GetAllUSersRequestQueryType,
   ): Promise<GetAllUsersResponseType> {
     return this._userService.getAllUsers(new GetAllUsersDto(query), req.logger);
@@ -52,18 +56,20 @@ export default class UserController {
 
   // Route to get single user detail
   @Get(':id')
+  @SwaggerDoc(USER_SWAGGER_SCHEMA.GET_USER_BY_ID)
   @Roles(UserRoleEnum.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UsePipes(new RequestValidationPipe(UsersSchema.shape.getUser))
   public async getUserDetailsById(
     @Req() req: Request,
     @Param() param: GetUserRequestParamType,
-  ): Promise<GetUserByIdResponseType | null> {
+  ): Promise<GetUserByIdResponseType> {
     return this._userService.getUserById(param.id, req.logger);
   }
 
   // Route to update user roles
   @Patch(':id')
+  @SwaggerDoc(USER_SWAGGER_SCHEMA.UPDATE_USER_ROLE)
   @UsePipes(new RequestValidationPipe(UsersSchema.shape.updateUserDetails))
   @Roles(UserRoleEnum.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -72,11 +78,12 @@ export default class UserController {
     @Param() param: UpdateUserDetailsRequestParamsType,
     @Body() body: UpdateUserDetailsRequestBodyType,
   ): Promise<SimpleResponseType> {
-    return this._userService.updateUserDetails(param, body, req.logger);
+    return this._userService.updateUserDetails(param.id, body, req.logger);
   }
 
   // Route to soft delete user
   @Delete(':id')
+  @SwaggerDoc(USER_SWAGGER_SCHEMA.DELETE_USER_BY_ID)
   @UsePipes(new RequestValidationPipe(UsersSchema.shape.deleteUser))
   @Roles(UserRoleEnum.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -88,10 +95,18 @@ export default class UserController {
   }
 
   @Get('/me/documents')
-  @UseGuards(JwtAuthGuard)
+  @SwaggerDoc(USER_SWAGGER_SCHEMA.GET_USER_DOCUMENTS)
   @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @UsePipes(new RequestValidationPipe(UsersSchema.shape.getUserDocuments))
-  getUserAllDocuments(@Req() req: Request): Promise<DocumentEntity[]> {
-    return this._userService.getUserDocuments(req.user.sub, req.logger);
+  getUserAllDocuments(
+    @Req() req: Request,
+    @Query() query: GetUserDocumentsRequestQueryType,
+  ): Promise<GetUserDocumentsResponseType> {
+    return this._userService.getUserDocuments(
+      req.user,
+      new GetUserDocumentsDTO(query),
+      req.logger,
+    );
   }
 }

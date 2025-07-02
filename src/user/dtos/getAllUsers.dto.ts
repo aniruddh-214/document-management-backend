@@ -9,7 +9,6 @@ export default class GetAllUsersDto {
   public email?: string;
   public role?: Array<(typeof validRoles)[number]>;
 
-  public isActive?: boolean;
   public isDeleted?: boolean;
 
   public page = 1;
@@ -18,17 +17,8 @@ export default class GetAllUsersDto {
   public sortOrder: DatabaseSortingOrder = DatabaseSortingOrder.DESC;
 
   public constructor(query: GetAllUSersRequestQueryType) {
-    const {
-      select,
-      fullName,
-      email,
-      role,
-      isActive,
-      isDeleted,
-      page,
-      limit,
-      sortOrder,
-    } = query;
+    const { select, fullName, email, role, isDeleted, page, limit, sortOrder } =
+      query;
 
     if (select?.length) {
       this.select = select;
@@ -38,7 +28,6 @@ export default class GetAllUsersDto {
     this.email = email;
     this.role = role as Array<(typeof validRoles)[number]>;
 
-    this.isActive = isActive;
     this.isDeleted = isDeleted;
 
     this.page = page;

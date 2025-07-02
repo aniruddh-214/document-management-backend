@@ -54,14 +54,6 @@ export const UsersSchema = z.object({
           { message: VALIDATION_MESSAGES.ROLES_INVALID },
         ),
 
-      isActive: z
-        .string()
-        .min(1, { message: VALIDATION_MESSAGES.INVALID_INPUT })
-        .transform((data): boolean | undefined =>
-          ZodHelper.convertStringToBoolean(data),
-        )
-        .optional(),
-
       isDeleted: z
         .string()
         .min(1, { message: VALIDATION_MESSAGES.INVALID_INPUT })
@@ -156,8 +148,43 @@ export const UsersSchema = z.object({
   }),
 
   getUserDocuments: z.object({
-    param: z.object({
-      id: z.string().uuid({ message: VALIDATION_MESSAGES.INVALID_USER_ID }),
+    query: z.object({
+      id: z
+        .string()
+        .uuid({ message: VALIDATION_MESSAGES.INVALID_USER_ID })
+        .optional(),
+      page: z
+        .string()
+        .min(1, { message: VALIDATION_MESSAGES.INVALID_INPUT })
+        .optional()
+        .transform((val) => Number(val || 1))
+        .refine(
+          (val) =>
+            typeof val === 'number' &&
+            val >= 1 &&
+            val <= Number.MAX_SAFE_INTEGER,
+          {
+            message: VALIDATION_MESSAGES.PAGE_INVALID,
+          },
+        ),
+
+      limit: z
+        .string()
+        .min(1, { message: VALIDATION_MESSAGES.INVALID_INPUT })
+        .optional()
+        .transform((val) => Number(val || 20))
+        .refine((val) => val >= 1 && val <= 100, {
+          message: VALIDATION_MESSAGES.LIMIT_INVALID,
+        }),
+
+      sortOrder: z
+        .nativeEnum(DatabaseSortingOrder, {
+          errorMap: () => ({
+            message: VALIDATION_MESSAGES.SORT_ORDER_INVALID,
+          }),
+        })
+        .optional()
+        .default(DatabaseSortingOrder.DESC),
     }),
   }),
 });
@@ -181,6 +208,6 @@ export type DeleteUserRequestParamType = z.infer<
   typeof UsersSchema.shape.deleteUser.shape.param
 >;
 
-export type getUserDocumentsRequestParamType = z.infer<
-  typeof UsersSchema.shape.getUserDocuments.shape.param
+export type GetUserDocumentsRequestQueryType = z.infer<
+  typeof UsersSchema.shape.getUserDocuments.shape.query
 >;

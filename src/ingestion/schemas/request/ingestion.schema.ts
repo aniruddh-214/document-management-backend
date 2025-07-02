@@ -1,14 +1,14 @@
 import { z } from 'zod';
 
-import { DatabaseSortingOrder } from '../../common/enums/dbOrderSort.enum';
-import ZodHelper from '../../common/helpers/zod.helper';
-import { USER_CONSTANTS } from '../../user/constants/user.constant';
+import { DatabaseSortingOrder } from '../../../common/enums/dbOrderSort.enum';
+import ZodHelper from '../../../common/helpers/zod.helper';
+import { USER_CONSTANTS } from '../../../user/constants/user.constant';
 import {
   INGESTION_CONSTANTS,
   ingestionEntityKeys,
-} from '../constants/ingestion.constant';
-import { IngestionEntity } from '../entities/ingestion.entity';
-import IngestionStatusEnum from '../enums/ingestion.enum';
+} from '../../constants/ingestion.constant';
+import { IngestionEntity } from '../../entities/ingestion.entity';
+import IngestionStatusEnum from '../../enums/ingestion.enum';
 
 export const IngestionSchema = z.object({
   triggerIngestion: z.object({
@@ -71,12 +71,6 @@ export const IngestionSchema = z.object({
         .optional(),
 
       hasError: z
-        .string()
-        .min(1, { message: INGESTION_CONSTANTS.ZOD.INVALID_INPUT })
-        .transform(ZodHelper.convertStringToBoolean)
-        .optional(),
-
-      isActive: z
         .string()
         .min(1, { message: INGESTION_CONSTANTS.ZOD.INVALID_INPUT })
         .transform(ZodHelper.convertStringToBoolean)
