@@ -21,6 +21,7 @@ import { Request, Response } from 'express';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/role.guard';
+import { SwaggerDoc } from '../common/decorators/swagger.decorator';
 import UserRoleEnum from '../common/enums/role.enum';
 import { RequestValidationPipe } from '../common/pipes/zodValidation.pipe';
 import { SimpleResponseType } from '../common/types/response/genericMessage.type';
@@ -30,6 +31,7 @@ import { DocumentService } from './document.service';
 import GetAllDocumentsDto from './dtos/getAllDocuments.dto';
 import { DocumentEntity } from './entities/document.entity';
 import { DocumentOwnershipGuard } from './guards/documentOwnership.guard';
+import { DOCUMENT_SWAGGER_SCHEMA } from './schemas/documentSwagger.schema';
 import {
   DownloadDocumentRequestParamType,
   DocumentSchema,
@@ -40,30 +42,31 @@ import {
   DeleteDocumentRequestParamType,
   GetAllDocumentsRequestQueryType,
 } from './schemas/request/document.schema';
+import { GetAllDocumentsResponseType } from './types/response/getAllDocuments.type';
+import { UploadDocumentResponseType } from './types/response/uploadDocument.type';
 
 @Controller('document')
 export class DocumentController {
   constructor(private readonly documentService: DocumentService) {}
 
   @Get('all')
+  @SwaggerDoc(DOCUMENT_SWAGGER_SCHEMA.GET_ALL_DOCUMENTS)
   @UseGuards(JwtAuthGuard)
   @UsePipes(new RequestValidationPipe(DocumentSchema.shape.getAllDocuments))
   getAllDocuments(
     @Req() req: Request,
     @Query() query: GetAllDocumentsRequestQueryType,
-  ): Promise<{
-    data: DocumentEntity[];
-    totalCount: number;
-    totalPages: number;
-  }> {
+  ): Promise<GetAllDocumentsResponseType> {
     return this.documentService.getAllDocuments(
-      req.logger,
       new GetAllDocumentsDto(query),
+      req.logger,
     );
   }
+
   @Post('upload')
+  @SwaggerDoc(DOCUMENT_SWAGGER_SCHEMA.UPLOAD_FILE)
+  @Roles(UserRoleEnum.EDITOR)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR)
   @UsePipes(new RequestValidationPipe(DocumentSchema.shape.uploadDocument))
   @UseInterceptors(
     FileInterceptor('document', {
@@ -76,20 +79,21 @@ export class DocumentController {
     @UploadedFile() file: Express.Multer.File,
     @Req() req: Request,
     @Body() body: UploadDocumentRequestBodyType,
-  ): Promise<Partial<DocumentEntity>> {
+  ): Promise<UploadDocumentResponseType> {
     if (!file) {
       throw new BadRequestException('File is required');
     }
 
     return this.documentService.createDocument(
-      req.logger,
       req.user.sub,
       body,
       file,
+      req.logger,
     );
   }
 
   @Patch(':id/update')
+  @SwaggerDoc(DOCUMENT_SWAGGER_SCHEMA.UPDATE_FILE)
   @UseGuards(JwtAuthGuard, DocumentOwnershipGuard)
   @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR)
   @UsePipes(new RequestValidationPipe(DocumentSchema.shape.updateDocument))
@@ -107,17 +111,17 @@ export class DocumentController {
     @UploadedFile() file?: Express.Multer.File,
   ): Promise<SimpleResponseType> {
     return this.documentService.updateDocument(
-      req.logger,
       param.id,
       body,
       req.context as DocumentEntity,
+      req.logger,
       file,
     );
   }
 
   @Get(':id/download')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR, UserRoleEnum.VIEWER)
+  @SwaggerDoc(DOCUMENT_SWAGGER_SCHEMA.DOWNLOAD_DOCUMENT)
+  @UseGuards(JwtAuthGuard)
   @UsePipes(new RequestValidationPipe(DocumentSchema.shape.downloadDocument))
   async downloadDocument(
     @Param() param: DownloadDocumentRequestParamType,
@@ -125,7 +129,7 @@ export class DocumentController {
     @Req() req: Request,
   ): Promise<void> {
     const { stream, mimeType, filename } =
-      await this.documentService.downloadDocument(req.logger, param.id);
+      await this.documentService.downloadDocument(param.id, req.logger);
 
     res.set({
       'Content-Type': mimeType,
@@ -136,21 +140,22 @@ export class DocumentController {
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR, UserRoleEnum.VIEWER)
+  @SwaggerDoc(DOCUMENT_SWAGGER_SCHEMA.GET_DOCUMENT_BY_ID)
+  @UseGuards(JwtAuthGuard)
   @UsePipes(new RequestValidationPipe(DocumentSchema.shape.getDocument))
   async getDocument(
     @Param() param: GetDocumentRequestParamType,
     @Req() req: Request,
   ): Promise<Partial<DocumentEntity> | null> {
     return this.documentService.getDocumentDetailsById(
-      req.logger,
       param.id,
+      req.logger,
       true,
     );
   }
 
   @Delete(':id/delete')
+  @SwaggerDoc(DOCUMENT_SWAGGER_SCHEMA.DELETE_DOCUMENT)
   @UseGuards(JwtAuthGuard, DocumentOwnershipGuard)
   @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR)
   @UsePipes(new RequestValidationPipe(DocumentSchema.shape.deleteDocument))
@@ -159,8 +164,8 @@ export class DocumentController {
     @Param() _param: DeleteDocumentRequestParamType,
   ): Promise<SimpleResponseType> {
     return this.documentService.deleteDocumentById(
-      req.logger,
       req.context as DocumentEntity,
+      req.logger,
     );
   }
 }

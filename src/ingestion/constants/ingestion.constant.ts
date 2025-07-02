@@ -9,8 +9,7 @@ export const ingestionEntityKeys: Array<keyof IngestionEntity> = [
   'userId',
   'createdAt',
   'updatedAt',
-  'isActive',
-  'isDeleted',
+  'deletedAt',
 ];
 
 export const INGESTION_CONSTANTS = {

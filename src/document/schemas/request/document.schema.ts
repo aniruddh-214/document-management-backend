@@ -70,14 +70,6 @@ export const DocumentSchema = z.object({
         .max(150, { message: DOCUMENT_CONSTANTS.ZOD.INVALID_INPUT })
         .optional(),
 
-      isActive: z
-        .string()
-        .min(1, { message: DOCUMENT_CONSTANTS.ZOD.INVALID_INPUT })
-        .transform((data): boolean | undefined =>
-          ZodHelper.convertStringToBoolean(data),
-        )
-        .optional(),
-
       isDeleted: z
         .string()
         .min(1, { message: DOCUMENT_CONSTANTS.ZOD.INVALID_INPUT })

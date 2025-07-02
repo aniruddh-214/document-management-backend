@@ -1,8 +1,11 @@
 import {
+  ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { IsNull, QueryFailedError } from 'typeorm';
 
 import BcryptUtil from '../common/utils/bcrypt.util';
 import { JsonWebToken } from '../common/utils/jsonwebtoken.util';
@@ -29,7 +32,33 @@ export class AuthService {
     body: CreateUserRequestType,
     logger: LoggerService,
   ): Promise<CreateUserResponseType> {
-    return this._userService.createUser(body, logger);
+    try {
+      logger.logInfo({
+        action: 'info',
+        source: 'AuthService#createUser',
+        message: `User created into db with email: ${body.email}`,
+      });
+
+      const { id, role } = await this._userService.createUser(body, logger);
+      return {
+        id,
+        role,
+      };
+    } catch (error) {
+      logger.logError({
+        message: `error while creating the user with email: ${body.email}`,
+        action: 'error',
+        source: 'AuthService#createUser',
+        errorMessage: (error as Error).message,
+      });
+      if (
+        error instanceof QueryFailedError &&
+        error.driverError?.code === '23505'
+      ) {
+        throw new ConflictException('Email already in use');
+      }
+      throw new InternalServerErrorException('Failed to create user');
+    }
   }
 
   public async login(
@@ -38,93 +67,94 @@ export class AuthService {
   ): Promise<LoginResponseType> {
     const { email, password } = body;
 
-    logger.logInfo({
-      action: 'info',
-      message: `Attempting login for user: ${email}`,
-      source: 'AuthService#login',
-    });
-
-    const user = await this._userService.findUserBy(
-      {
-        where: {
-          email,
-          isDeleted: false,
+    try {
+      const user = await this._userService.findUserBy(
+        {
+          where: {
+            email,
+            deletedAt: IsNull(),
+          },
+          select: {
+            id: true,
+            password: true,
+            role: true,
+          },
         },
-        select: {
-          id: true,
-          password: true,
-          role: true,
-        },
-      },
-      logger,
-    );
+        logger,
+      );
 
-    if (!user) {
-      logger.logError({
-        message: `User not found with email: ${email}`,
-        action: 'error',
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      const isPasswordValid = BcryptUtil.comparePassword(
+        password,
+        user.password,
+      );
+
+      if (!isPasswordValid) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      const userPayload: UserAuthTokenPayload = {
+        sub: user.id,
+        role: user.role,
+      };
+
+      const accessToken = this._jwtService.generateJwtToken(userPayload);
+
+      logger.logInfo({
+        action: 'info',
+        message: `User logged in successfully: ${email}`,
         source: 'AuthService#login',
       });
-      throw new NotFoundException('User not found');
-    }
 
-    const isPasswordValid = await BcryptUtil.comparePassword(
-      password,
-      user.password,
-    );
-
-    if (!isPasswordValid) {
+      return { accessToken };
+    } catch (error) {
       logger.logError({
-        message: 'Invalid password',
         action: 'error',
+        errorMessage: (error as Error).message,
+        message: `Error while login with email: ${email}`,
         source: 'AuthService#login',
       });
-      throw new UnauthorizedException('Invalid credentials');
+      throw error;
     }
-
-    const userPayload: UserAuthTokenPayload = {
-      sub: user.id,
-      role: user.role,
-    };
-
-    const token = this._jwtService.generateJwtToken(userPayload);
-
-    void this._userService.updateUserBy(
-      { id: user.id },
-      { lastLogin: new Date() },
-      logger,
-    );
-
-    logger.logInfo({
-      action: 'info',
-      message: `User logged in successfully: ${email}`,
-      source: 'AuthService#login',
-    });
-
-    return { accessToken: token };
   }
 
   public async getUserProfile(
     userId: string,
     logger: LoggerService,
   ): Promise<Partial<UserEntity>> {
-    const user = await this._userService.findUserBy(
-      {
-        where: { id: userId },
-        select: {
-          id: true,
-          email: true,
-          role: true,
-          lastLogin: true,
+    try {
+      const user = await this._userService.findUserBy(
+        {
+          where: { id: userId },
+          select: {
+            id: true,
+            email: true,
+            role: true,
+          },
         },
-      },
-      logger,
-    );
+        logger,
+      );
 
-    if (!user) {
-      throw new NotFoundException('User not found');
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      logger.logInfo({
+        action: 'info',
+        message: `User found for ID ${userId}`,
+        source: 'AuthService#getUserProfile',
+      });
+      return user;
+    } catch (error) {
+      logger.logError({
+        action: 'error',
+        message: `Error while getting user profile for ID: ${userId}`,
+        errorMessage: (error as Error).message,
+        source: 'AuthService#getUserProfile',
+      });
+      throw error;
     }
-
-    return user;
   }
 }

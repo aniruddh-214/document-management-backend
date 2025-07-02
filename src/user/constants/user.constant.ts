@@ -71,12 +71,11 @@ export const USER_CONSTANTS = {
 
 export const userEntityKeys: Array<keyof UserEntity> = [
   'id',
-  'email',
   'fullName',
+  'email',
   'role',
+  'version',
   'createdAt',
   'updatedAt',
-  'isActive',
-  'isDeleted',
-  'lastLogin',
+  'deletedAt',
 ];

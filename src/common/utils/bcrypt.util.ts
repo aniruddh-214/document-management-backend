@@ -1,16 +1,18 @@
-import * as bcrypt from 'bcrypt';
+// src/common/utils/bcrypt.util.ts
+import * as bcrypt from 'bcryptjs';
 
 const SALT_ROUNDS = 10;
 
 export default class BcryptUtil {
-  static async hashPassword(password: string): Promise<string> {
-    return bcrypt.hash(password, SALT_ROUNDS);
+  static hashPassword(password: string): string {
+    if (!password || typeof password !== 'string') {
+      throw new Error('Invalid password input');
+    }
+
+    return bcrypt.hashSync(password, SALT_ROUNDS);
   }
 
-  static async comparePassword(
-    plainText: string,
-    hash: string,
-  ): Promise<boolean> {
-    return bcrypt.compare(plainText, hash);
+  static comparePassword(plainText: string, hash: string): boolean {
+    return bcrypt.compareSync(plainText, hash);
   }
 }

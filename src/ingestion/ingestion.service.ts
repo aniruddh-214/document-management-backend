@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { InsertResult, Repository } from 'typeorm';
+import { InsertResult, IsNull, Repository } from 'typeorm';
 
 import { UserAuthTokenPayload } from '../auth/interfaces/jwtPayload.interface';
 import UserRoleEnum from '../common/enums/role.enum';
@@ -31,17 +31,11 @@ export class IngestionService {
     user: UserAuthTokenPayload,
     docId: string,
   ): Promise<TriggerIngestionResponseType> {
-    logger.logInfo({
-      action: 'info',
-      source: 'IngestionService#triggerIngestion',
-      message: `Ingestion triggered for ${docId} by ${user.sub}`,
-    });
-
     try {
       const document = await this._documentService.findDocumentBy(logger, {
         where: {
           id: docId,
-          isDeleted: false,
+          deletedAt: IsNull(),
         },
         select: {
           userId: true,
@@ -72,6 +66,12 @@ export class IngestionService {
       const insertedIngestion = result.raw[0];
 
       this.simulateProcessing(insertedIngestion.id, logger);
+      logger.logInfo({
+        action: 'info',
+        source: 'IngestionService#triggerIngestion',
+        message: `Ingestion triggered for ${docId} by ${user.sub}`,
+      });
+
       return {
         message: `Triggered ingestion successfully. Current status: ${IngestionStatusEnum.QUEUED}`,
         documentId: docId,
@@ -113,9 +113,10 @@ export class IngestionService {
                 ? IngestionStatusEnum.COMPLETED
                 : IngestionStatusEnum.FAILED,
               logs: success
-                ? `Completed successfully at ${new Date().toISOString()}`
-                : `Failed at ${new Date().toISOString()}`,
+                ? `Completed successfully at ${new Date().toUTCString()}`
+                : `Failed at ${new Date().toUTCString()}`,
               errorMessage: success ? undefined : 'Simulated ingestion failure',
+              finishedAt: new Date().toUTCString(),
             });
 
             logger.logInfo({
@@ -137,7 +138,7 @@ export class IngestionService {
   ): Promise<Partial<IngestionEntity>> {
     try {
       const ingestion = await this._ingestionRepo.findOne({
-        where: { id: ingestionId, isDeleted: false },
+        where: { id: ingestionId, deletedAt: IsNull() },
         select: [
           'id',
           'updatedAt',
@@ -151,7 +152,9 @@ export class IngestionService {
       });
 
       if (!ingestion) {
-        throw new Error(`Ingestion with ID ${ingestionId} not found`);
+        throw new NotFoundException(
+          `Ingestion with ID ${ingestionId} not found`,
+        );
       }
 
       logger.logInfo({
@@ -179,17 +182,7 @@ export class IngestionService {
     logger: LoggerService,
   ): Promise<SimpleResponseType> {
     try {
-      const result = await this._ingestionRepo.update(
-        {
-          id: ingestionId,
-          isDeleted: false,
-        },
-        {
-          isDeleted: true,
-          isActive: false,
-          deletedAt: new Date(),
-        },
-      );
+      const result = await this._ingestionRepo.softDelete({ id: ingestionId });
 
       if (result.affected === 0) {
         logger.logInfo({
@@ -238,13 +231,6 @@ export class IngestionService {
     totalCount: number;
     totalPages: number;
   }> {
-    logger.logInfo({
-      action: 'info',
-      message: 'Fetching ingestions with filters',
-      source: 'IngestionService#getAllIngestions',
-      details: filters,
-    });
-
     const {
       select,
       id,
@@ -297,7 +283,11 @@ export class IngestionService {
       }
 
       if (typeof isDeleted === 'boolean') {
-        query.andWhere('ingestion.is_deleted = :isDeleted', { isDeleted });
+        if (isDeleted) {
+          query.andWhere('ingestion.deleted_at IS NOT NULL');
+        } else {
+          query.andWhere('ingestion.deleted_at IS NULL');
+        }
       }
 
       if (typeof hasLogs === 'boolean') {

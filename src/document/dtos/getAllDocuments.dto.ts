@@ -15,7 +15,6 @@ export default class GetAllDocumentsDto {
   public title?: string;
   public mimeType?: string;
 
-  public isActive?: boolean;
   public isDeleted?: boolean;
 
   public sortOrder: DatabaseSortingOrder = DatabaseSortingOrder.DESC;
@@ -24,16 +23,8 @@ export default class GetAllDocumentsDto {
   public limit = 20;
 
   public constructor(query: GetAllDocumentsRequestQueryType) {
-    const {
-      select,
-      title,
-      mimeType,
-      isActive,
-      isDeleted,
-      page,
-      limit,
-      sortOrder,
-    } = query;
+    const { select, title, mimeType, isDeleted, page, limit, sortOrder } =
+      query;
 
     if (select?.length) {
       this.select = select;
@@ -42,7 +33,6 @@ export default class GetAllDocumentsDto {
     this.title = title;
     this.mimeType = mimeType;
 
-    this.isActive = isActive;
     this.isDeleted = isDeleted;
 
     this.page = page ?? this.page;

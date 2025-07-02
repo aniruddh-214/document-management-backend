@@ -1,7 +1,7 @@
 import { DatabaseSortingOrder } from '../../common/enums/dbOrderSort.enum';
 import { IngestionEntity } from '../entities/ingestion.entity';
 import IngestionStatusEnum from '../enums/ingestion.enum';
-import { GetAllIngestionsRequestQueryType } from '../schemas/ingestion.schema';
+import { GetAllIngestionsRequestQueryType } from '../schemas/request/ingestion.schema';
 
 export default class GetAllIngestionsDto {
   public select: Array<keyof IngestionEntity> = [
@@ -40,7 +40,6 @@ export default class GetAllIngestionsDto {
       documentId,
       userId,
       status,
-      isActive,
       isDeleted,
       hasLogs,
       hasError,
@@ -58,7 +57,6 @@ export default class GetAllIngestionsDto {
     this.userId = userId;
     this.status = status;
 
-    this.isActive = isActive;
     this.isDeleted = isDeleted;
 
     this.hasLogs = hasLogs;

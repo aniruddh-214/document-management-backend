@@ -10,12 +10,14 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 
+import { SwaggerDoc } from '../common/decorators/swagger.decorator';
 import { RequestValidationPipe } from '../common/pipes/zodValidation.pipe';
 import UserEntity from '../user/entities/user.entity';
 import { CreateUserResponseType } from '../user/types/response/createUser.type';
 
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/auth.guard';
+import { AUTH_SWAGGER_SCHEMA } from './schemas/authSwagger.schema';
 import {
   AuthSchema,
   CreateUserRequestType,
@@ -28,6 +30,7 @@ export class AuthController {
   public constructor(private readonly _authService: AuthService) {}
 
   @Post('register')
+  @SwaggerDoc(AUTH_SWAGGER_SCHEMA.REGISTER_USER)
   @UsePipes(new RequestValidationPipe(AuthSchema.shape.createUser))
   public async register(
     @Req() req: Request,
@@ -37,6 +40,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @SwaggerDoc(AUTH_SWAGGER_SCHEMA.LOGIN_USER)
   @UsePipes(new RequestValidationPipe(AuthSchema.shape.loginUser))
   @HttpCode(200)
   public async login(
@@ -47,6 +51,7 @@ export class AuthController {
   }
 
   @Get('logout')
+  @SwaggerDoc(AUTH_SWAGGER_SCHEMA.LOGOUT_USER)
   @UseGuards(JwtAuthGuard)
   public logout(): { message: string } {
     // Since backend can't invalid the token we can use other ways if intentionally want
@@ -54,6 +59,7 @@ export class AuthController {
   }
 
   @Get('profile')
+  @SwaggerDoc(AUTH_SWAGGER_SCHEMA.USER_PROFILE)
   @UseGuards(JwtAuthGuard)
   public getUserProfile(@Req() req: Request): Promise<Partial<UserEntity>> {
     return this._authService.getUserProfile(req.user.sub, req.logger);

@@ -8,16 +8,19 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOneOptions, Repository } from 'typeorm';
+import { FindOneOptions, IsNull, Repository } from 'typeorm';
 
 import { SimpleResponseType } from '../common/types/response/genericMessage.type';
 import LoggerService from '../common/utils/logging/loggerService';
+import GetUserDocumentsDTO from '../user/dtos/getUserDocuements.dto';
+import { GetUserDocumentsResponseType } from '../user/types/response/getUserDocuments.type';
 
 import { DocumentEntity } from './entities/document.entity';
 import {
   GetAllDocumentsRequestQueryType,
   UploadDocumentRequestBodyType,
 } from './schemas/request/document.schema';
+import { UploadDocumentResponseType } from './types/response/uploadDocument.type';
 import FSUtils from './utils/fs.util';
 
 @Injectable()
@@ -28,17 +31,11 @@ export class DocumentService {
   ) {}
 
   public async createDocument(
-    logger: LoggerService,
     userId: string,
     body: UploadDocumentRequestBodyType,
     file: Express.Multer.File,
-  ): Promise<Partial<DocumentEntity>> {
-    logger.logInfo({
-      action: 'info',
-      message: 'Saving user document information into DB',
-      source: 'DocumentService#createDocument',
-    });
-
+    logger: LoggerService,
+  ): Promise<UploadDocumentResponseType> {
     try {
       file.path = FSUtils.AbsoluteToRelativePath(file.path);
       const document: Partial<DocumentEntity> = {
@@ -66,8 +63,13 @@ export class DocumentService {
           'Document creation failed — no ID returned',
         );
       }
-
+      logger.logInfo({
+        action: 'info',
+        message: 'Saved user document information into DB',
+        source: 'DocumentService#createDocument',
+      });
       return {
+        message: 'Document successfully uploaded',
         id: insertId,
       };
     } catch (error) {
@@ -118,10 +120,10 @@ export class DocumentService {
   }
 
   public async updateDocument(
-    logger: LoggerService,
     docId: string,
     newUpdates: Partial<DocumentEntity>,
     existingDocument: DocumentEntity,
+    logger: LoggerService,
     file?: Express.Multer.File,
   ): Promise<SimpleResponseType> {
     logger.logInfo({
@@ -159,11 +161,6 @@ export class DocumentService {
       ]);
 
       if (result.affected === 0) {
-        logger.logError({
-          action: 'error',
-          message: `No document found to update with id: ${docId}`,
-          source: 'DocumentService#updateDocument',
-        });
         throw new NotFoundException(`Document with id ${docId} not found`);
       }
 
@@ -189,184 +186,193 @@ export class DocumentService {
   }
 
   public async downloadDocument(
-    logger: LoggerService,
     id: string,
+    logger: LoggerService,
   ): Promise<{ stream: fs.ReadStream; mimeType: string; filename: string }> {
-    const document = await this.findDocumentBy(logger, {
-      where: {
-        id,
-        isDeleted: false,
-        isActive: true,
-      },
-      select: {
-        filePath: true,
-        mimeType: true,
-        title: true,
-      },
-    });
+    try {
+      const document = await this.findDocumentBy(logger, {
+        where: {
+          id,
+          deletedAt: IsNull(),
+        },
+        select: {
+          filePath: true,
+          mimeType: true,
+          title: true,
+        },
+      });
 
-    if (!document?.filePath) {
-      logger.logError({
-        action: 'download',
-        message: `Document not found with id: ${id}`,
+      if (!document?.filePath) {
+        throw new NotFoundException(`Document with id ${id} not found`);
+      }
+      const { mimeType, title, filePath } = document;
+      const absolutePath = path.join(process.cwd(), filePath);
+      if (!fs.existsSync(absolutePath)) {
+        throw new NotFoundException('File does not exist on server');
+      }
+
+      const stream = fs.createReadStream(absolutePath);
+
+      logger.logInfo({
+        action: 'info',
+        message: `Streaming file for document id: ${id}`,
         source: 'DocumentService#downloadDocument',
       });
-      throw new NotFoundException(`Document with id ${id} not found`);
-    }
-    const { mimeType, title, filePath } = document;
-    const absolutePath = path.join(process.cwd(), filePath);
-    if (!fs.existsSync(absolutePath)) {
+
+      return {
+        stream,
+        mimeType: mimeType || 'application/octet-stream',
+        filename: title + path.extname(absolutePath),
+      };
+    } catch (error) {
       logger.logError({
-        action: 'download',
-        message: `File not found on disk: ${absolutePath}`,
+        action: 'info',
+        message: `Error while downloading document for ID: ${id}`,
         source: 'DocumentService#downloadDocument',
       });
-      throw new NotFoundException('File does not exist on server');
+      throw error;
     }
-
-    const stream = fs.createReadStream(absolutePath);
-
-    logger.logInfo({
-      action: 'download',
-      message: `Streaming file for document id: ${id}`,
-      source: 'DocumentService#downloadDocument',
-    });
-
-    return {
-      stream,
-      mimeType: mimeType || 'application/octet-stream',
-      filename: title + path.extname(absolutePath),
-    };
   }
 
   public async getDocumentDetailsById(
-    logger: LoggerService,
     id: string,
+    logger: LoggerService,
     throwIfNotFound = true,
-  ): Promise<DocumentEntity | null> {
-    logger.logInfo({
-      action: 'fetch',
-      message: `Fetching document details for id: ${id}`,
-      source: 'DocumentService#getDocumentDetailsById',
-    });
-
-    const document = await this._documentRepo.findOne({
-      where: {
-        id,
-        isDeleted: false,
-        isActive: true,
-      },
-      select: {
-        title: true,
-        description: true,
-        fileName: true,
-        mimeType: true,
-        size: true,
-        updatedAt: true,
-        createdAt: true,
-      },
-    });
-
-    if (!document && throwIfNotFound) {
-      logger.logError({
-        action: 'fetch',
-        message: `Document not found with id: ${id}`,
-        source: 'DocumentService#getDocumentDetailsById',
-      });
-      throw new NotFoundException(`Document with id ${id} not found`);
-    }
-
-    return document;
-  }
-
-  public async deleteDocumentById(
-    logger: LoggerService,
-    document: DocumentEntity,
-    needFileDelete = true,
-  ): Promise<SimpleResponseType> {
-    const absolutePath = path.resolve(process.cwd(), document.filePath.trim());
-
-    const fileDeleteTask = async (): Promise<void> => {
-      if (needFileDelete && fs.existsSync(absolutePath)) {
-        await fs.promises.unlink(absolutePath);
-        logger.logInfo({
-          action: 'delete_file',
-          message: `Deleted file: ${absolutePath}`,
-          source: 'DocumentService#deleteDocumentFile',
-        });
-      }
-    };
-
-    const dbUpdateTask = this._documentRepo.update(
-      { id: document.id },
-      { isDeleted: true, isActive: false, deletedAt: Date.now() },
-    );
-
-    const [fileResult, dbResult] = await Promise.allSettled([
-      fileDeleteTask(),
-      dbUpdateTask,
-    ]);
-
-    if (fileResult.status === 'rejected') {
-      logger.logWarn({
-        action: 'delete_file',
-        message: 'File delete failed (non-blocking)',
-        source: 'DocumentService#deleteDocumentFile',
-        errorMessage: fileResult.reason?.message,
-      });
-    }
-
-    if (dbResult.status === 'rejected' || dbResult.value.affected === 0) {
-      throw new Error('Failed to update document metadata');
-    }
-
-    logger.logInfo({
-      action: 'delete_document',
-      message: `Soft deleted document ${document.id}`,
-      source: 'DocumentService#deleteDocumentFile',
-    });
-
-    return { message: `Document ${document.id} deleted successfully` };
-  }
-
-  public async getUserDocuments(
-    logger: LoggerService,
-    userId: string,
-  ): Promise<DocumentEntity[]> {
-    logger.logInfo({
-      action: 'get_user_documents',
-      message: `Fetching documents for user: ${userId}`,
-      source: 'UserService#getUserDocuments',
-    });
-
+  ): Promise<DocumentEntity> {
     try {
-      const documents = await this._documentRepo.find({
+      const document = await this._documentRepo.findOne({
         where: {
-          userId,
-          isDeleted: false,
-          isActive: true,
-        },
-        order: {
-          createdAt: 'DESC',
+          id,
+          deletedAt: IsNull(),
         },
         select: {
-          id: true,
           title: true,
           description: true,
           fileName: true,
-          filePath: true,
           mimeType: true,
           size: true,
-          createdAt: true,
           updatedAt: true,
+          createdAt: true,
+          version: true,
         },
       });
 
-      return documents;
+      if (!document || throwIfNotFound) {
+        throw new NotFoundException(`Document with id ${id} not found`);
+      }
+      logger.logInfo({
+        action: 'info',
+        message: `found document details for id: ${id}`,
+        source: 'DocumentService#getDocumentDetailsById',
+      });
+      return document;
     } catch (error) {
       logger.logError({
-        action: 'get_user_documents',
-        message: `Error fetching documents for user ${userId}`,
+        action: 'error',
+        message: `Document not found with id: ${id}`,
+        source: 'DocumentService#getDocumentDetailsById',
+      });
+      throw error;
+    }
+  }
+
+  public async deleteDocumentById(
+    document: DocumentEntity,
+    logger: LoggerService,
+    needFileDelete = true,
+  ): Promise<SimpleResponseType> {
+    try {
+      const absolutePath = path.resolve(
+        process.cwd(),
+        document.filePath.trim(),
+      );
+
+      const fileDeleteTask = async (): Promise<void> => {
+        if (needFileDelete && fs.existsSync(absolutePath)) {
+          await fs.promises.unlink(absolutePath);
+          logger.logInfo({
+            action: 'info',
+            message: `Deleted file: ${absolutePath}`,
+            source: 'DocumentService#deleteDocumentFile',
+          });
+        }
+      };
+
+      const dbUpdateTask = this._documentRepo.softDelete({ id: document.id });
+
+      const [fileResult, dbResult] = await Promise.allSettled([
+        fileDeleteTask(),
+        dbUpdateTask,
+      ]);
+
+      if (fileResult.status === 'rejected') {
+        logger.logWarn({
+          action: 'warn',
+          message: 'File delete failed (non-blocking)',
+          source: 'DocumentService#deleteDocumentFile',
+          errorMessage: fileResult.reason?.message,
+        });
+      }
+
+      if (dbResult.status === 'rejected' || dbResult.value.affected === 0) {
+        throw new Error('Failed to update document metadata');
+      }
+
+      logger.logInfo({
+        action: 'delete_document',
+        message: `Soft deleted document ${document.id}`,
+        source: 'DocumentService#deleteDocumentFile',
+      });
+
+      return { message: `Document ${document.id} deleted successfully` };
+    } catch (error) {
+      logger.logInfo({
+        action: 'error',
+        message: `Error while deleting a document ${document.id}`,
+        source: 'DocumentService#deleteDocumentFile',
+      });
+      throw error;
+    }
+  }
+
+  public async getUserDocuments(
+    query: GetUserDocumentsDTO,
+    logger: LoggerService,
+  ): Promise<GetUserDocumentsResponseType> {
+    try {
+      const qb = this._documentRepo.createQueryBuilder('document');
+      const select = [
+        'document.id',
+        'document.title',
+        'document.description',
+        'document.fileName',
+        'document.mimeType',
+        'document.size',
+        'document.createdAt',
+      ];
+
+      if (query.needToIncludeFilePath) {
+        select.push('document.filePath');
+      }
+      qb.select(select);
+
+      qb.where('document.user_id = :id', { id: query.id });
+      qb.andWhere('document.deleted_at IS NULL');
+
+      qb.orderBy('document.created_at', query.order);
+      qb.skip((query.page - 1) * query.limit);
+      qb.take(query.limit);
+
+      const [data, total] = await qb.getManyAndCount();
+      return {
+        data: data,
+        totalCount: total,
+        totalPages: Math.ceil(total / query.limit),
+      };
+    } catch (error) {
+      logger.logError({
+        action: 'error',
+        message: `Error fetching documents for user ${query.id}`,
         source: 'UserService#getUserDocuments',
         errorMessage: error.message,
       });
@@ -375,29 +381,15 @@ export class DocumentService {
   }
 
   public async getAllDocuments(
-    logger: LoggerService,
     filters: GetAllDocumentsRequestQueryType,
+    logger: LoggerService,
   ): Promise<{
     data: DocumentEntity[];
     totalCount: number;
     totalPages: number;
   }> {
-    logger.logInfo({
-      action: 'info',
-      message: 'Fetching documents with filters',
-      source: 'DocumentService#getAllDocuments',
-      details: filters,
-    });
-    const {
-      select,
-      title,
-      mimeType,
-      isActive,
-      isDeleted,
-      page,
-      limit,
-      sortOrder,
-    } = filters;
+    const { select, title, mimeType, isDeleted, page, limit, sortOrder } =
+      filters;
 
     try {
       const query = this._documentRepo.createQueryBuilder('document');
@@ -411,7 +403,6 @@ export class DocumentService {
         'document.title',
         'document.description',
         'document.file_name',
-        'document.document_status',
         'document.size',
       ];
       query.select(columns);
@@ -426,12 +417,12 @@ export class DocumentService {
         });
       }
 
-      if (typeof isActive === 'boolean') {
-        query.andWhere('document.is_active = :isActive', { isActive });
-      }
-
       if (typeof isDeleted === 'boolean') {
-        query.andWhere('document.is_deleted = :isDeleted', { isDeleted });
+        if (isDeleted) {
+          query.andWhere('document.deleted_at IS NOT NULL');
+        } else {
+          query.andWhere('document.deleted_at IS NULL');
+        }
       }
 
       query
