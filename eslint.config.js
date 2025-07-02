@@ -199,6 +199,7 @@ module.exports = [
       '**/.*',
       'eslint.config.js',
       'test_reports',
+      'src/scripts',
       'jest.config.js',
       'src/**/*.spec.t*',
       'postman/*',
