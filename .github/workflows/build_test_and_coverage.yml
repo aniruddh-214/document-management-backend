@@ -10,6 +10,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        shard: [1, 2, 3]
+
     services:
       postgres:
         image: postgres:15
@@ -52,12 +56,13 @@ jobs:
       - name: Setup test environment
         run: pnpm test:setup
 
-      - name: Run tests
-        run: pnpm test
+      - name: Run tests shard ${{ matrix.shard }}
+        run: |
+          pnpm test -- --maxWorkers=1 --runInBand --testPathPattern= --shard=${{ matrix.shard }}/3
 
-      - name: Upload test coverage reports
+      - name: Upload test coverage reports shard ${{ matrix.shard }}
         uses: actions/upload-artifact@v4
         with:
-          name: test-coverage-report
+          name: test-coverage-report-shard-${{ matrix.shard }}
           path: test_reports/
           retention-days: 7
