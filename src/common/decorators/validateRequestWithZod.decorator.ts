@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { UsePipes } from '@nestjs/common';
 import { AnyZodObject } from 'zod';
 

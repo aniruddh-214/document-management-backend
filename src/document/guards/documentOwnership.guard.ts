@@ -25,11 +25,14 @@ export class DocumentOwnershipGuard implements CanActivate {
       );
     }
 
-    const doc = await this.documentService.findDocumentBy(request.logger, {
-      where: {
-        id: documentId,
+    const doc = await this.documentService.findDocumentBy(
+      {
+        where: {
+          id: documentId,
+        },
       },
-    });
+      request.logger,
+    );
 
     if (!doc) {
       throw new NotFoundException('Document not found');

@@ -1,13 +1,20 @@
-import { createLogger, format, transports, addColors } from 'winston';
-import 'winston-daily-rotate-file';
+import {
+  createLogger,
+  format,
+  transports,
+  addColors,
+  Logger,
+  Logform,
+} from 'winston';
 
+import 'winston-daily-rotate-file';
 import ENV from '../../../config/env.config';
 
 const { combine, timestamp, json, colorize, printf } = format;
 
-const getFormattedTimestamp = (): { date: string; zone: string } => {
+export const getFormattedTimestamp = (): { date: string; zone: string } => {
   const isProd = ENV.NODE_ENV === 'production';
-  const now = new Date();
+  const now = isProd ? new Date(Date.now()) : new Date();
 
   const formatter = new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
@@ -19,9 +26,7 @@ const getFormattedTimestamp = (): { date: string; zone: string } => {
     hour12: true,
   });
 
-  const dateStr = isProd
-    ? formatter.format(new Date(now.toUTCString()))
-    : formatter.format(now);
+  const dateStr = formatter.format(now);
 
   const timeZone = isProd
     ? 'UTC'
@@ -53,10 +58,17 @@ export const logLevels = {
 const stripAnsi = (str: string): string => str.replace(/\x1b\[[0-9;]*m/g, '');
 
 const SKY_BLUE_256 = '\x1b[96m';
-
 const RESET = '\x1b[0m';
 
-const consoleFormat = printf(({ level, message, stack }) => {
+export const consoleFormatterFn = ({
+  level,
+  message,
+  stack,
+}: {
+  level: string;
+  message: unknown;
+  stack?: unknown;
+}): string => {
   const pid = process.pid;
   const appName = ENV.APPLICATION_NAME;
   const { date, zone } = getFormattedTimestamp();
@@ -65,22 +77,30 @@ const consoleFormat = printf(({ level, message, stack }) => {
   const numericLevel =
     logLevels.levels[cleanLevel as keyof typeof logLevels.levels] ?? 'UNKNOWN';
 
-  const prefix = `${SKY_BLUE_256}[${appName}] ${pid}  - ${date} TIMEZONE ${zone} | LogLevel: ${numericLevel} |${RESET}`;
+  const prefix = `${SKY_BLUE_256}[${appName}] ${pid} - ${date} TIMEZONE ${zone} | LogLevel: ${numericLevel} |${RESET}`;
 
   const output =
-    typeof message === 'object' ? JSON.stringify(message, null, 2) : message;
+    typeof message === 'string' ? message : JSON.stringify(message, null, 2);
 
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-base-to-string
-  return `\n${prefix} ${output}${stack ? `\nStack: ${stack}` : ''}`;
-});
+  const stackOutput =
+    typeof stack === 'string'
+      ? `\nStack: ${stack}`
+      : stack !== undefined
+        ? `\nStack: ${JSON.stringify(stack, null, 2)}`
+        : '';
+
+  return `\n${prefix} ${output}${stackOutput}`;
+};
+
+export const consoleFormat: Logform.Format = printf(consoleFormatterFn);
 
 addColors(logLevels.colors);
 
-const logger = createLogger({
+const logger: Logger = createLogger({
   levels: logLevels.levels,
   level: 'trace',
   format: combine(timestamp(), json()),
-  defaultMeta: { service: process.env.APPLICATION_NAME || 'Nest' },
+  defaultMeta: { service: ENV.APPLICATION_NAME || 'Nest' },
   transports: [
     new transports.DailyRotateFile({
       filename: 'logs/combined-%DATE%.log',
@@ -100,7 +120,7 @@ const logger = createLogger({
   ],
 });
 
-if (process.env.SHOW_CONSOLE_LOG === 'true') {
+if (ENV.SHOW_CONSOLE_LOG === true) {
   logger.add(
     new transports.Console({
       format: combine(colorize({ all: true }), consoleFormat),

@@ -8,13 +8,14 @@ import helmet from 'helmet';
 
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/allExceptions.filter';
-import { TransformInterceptor } from './common/interceptors/transform.intercepter';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { GlobalAppLogger } from './common/utils/logging/loggerFactory';
 import ENV from './config/env.config';
 
 const bootstrap = async (): Promise<void> => {
   const app = await NestFactory.create(AppModule);
   const logger = GlobalAppLogger();
+  app.use('/favicon.ico', (req, res) => res.status(204).end());
   app.enableShutdownHooks();
 
   app.enableCors({

@@ -1,4 +1,3 @@
-// src/common/utils/bcrypt.util.ts
 import * as bcrypt from 'bcryptjs';
 
 const SALT_ROUNDS = 10;

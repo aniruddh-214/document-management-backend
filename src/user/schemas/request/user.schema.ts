@@ -129,14 +129,9 @@ export const UsersSchema = z.object({
             (role) => role !== UserRoleEnum.ADMIN,
           ) as any,
         )
-        .refine(
-          (val) =>
-            val !== UserRoleEnum.ADMIN ||
-            !Object.values(UserRoleEnum).includes(val),
-          {
-            message: VALIDATION_MESSAGES.INVALID_ROLE,
-          },
-        )
+        .refine((val) => val !== UserRoleEnum.ADMIN, {
+          message: VALIDATION_MESSAGES.INVALID_ROLE,
+        })
         .transform((val) => val as UserRoleEnum),
     }),
   }),

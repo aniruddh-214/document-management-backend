@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -40,7 +41,7 @@ export default class UserService {
   ): Promise<UserEntity> {
     logger.logInfo({
       action: 'info',
-      message: `Creating user with: ${JSON.stringify(user)}`,
+      message: `Creating user with: ${JSON.stringify(user.email)}`,
       source: 'UserService#createUser',
     });
 
@@ -201,7 +202,7 @@ export default class UserService {
 
       logger.logInfo({
         action: 'info',
-        message: user ? `Fetched user with id: ${id}` : `User not found: ${id}`,
+        message: `Fetched user with id: ${id}`,
         source: 'UserService#getUserById',
       });
 
@@ -230,13 +231,16 @@ export default class UserService {
   ): Promise<SimpleResponseType> {
     try {
       if ('role' in body && body.role === UserRoleEnum.ADMIN) {
-        throw new Error('Cannot assign admin role');
+        throw new BadRequestException('Cannot assign admin role');
       }
 
-      const updateResult = await this._userRepo.update(
-        { id, role: Not(UserRoleEnum.ADMIN) },
-        body,
-      );
+      const updateResult = await this._userRepo
+        .createQueryBuilder()
+        .update(UserEntity)
+        .set(body)
+        .where('id = :id', { id })
+        .andWhere('role != :adminRole', { adminRole: UserRoleEnum.ADMIN })
+        .execute();
 
       if (updateResult.affected === 0) {
         throw new NotFoundException(
@@ -259,7 +263,10 @@ export default class UserService {
         error,
       });
 
-      if (error instanceof NotFoundException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
 

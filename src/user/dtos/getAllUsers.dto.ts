@@ -30,8 +30,12 @@ export default class GetAllUsersDto {
 
     this.isDeleted = isDeleted;
 
-    this.page = page;
-    this.limit = limit;
+    if (page) {
+      this.page = page;
+    }
+    if (limit) {
+      this.limit = limit;
+    }
     this.sortOrder = sortOrder;
   }
 }

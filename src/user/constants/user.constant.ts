@@ -39,14 +39,6 @@ export const USER_CONSTANTS = {
       ROLE_MAX_LENGTH: 'Maximum of 2 roles are allowed',
       ROLE_DUPLICATE: 'Roles must be unique',
 
-      DATE_REQUIRED: (field: string): string =>
-        `${field} start date is required if end date is provided`,
-      DATE_INVALID: (field: string): string =>
-        `${field} must be a valid ISO or UTC date`,
-
-      BOOLEAN_INVALID: (field: string): string =>
-        `${field} must be either "true" or "false"`,
-
       PAGE_INVALID: 'Page must be >= 1 and less than MAX_SAFE_INTEGER',
       LIMIT_INVALID: 'Limit must be between 1 and 100',
 

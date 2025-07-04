@@ -16,6 +16,7 @@ import { DocumentService } from '../document/document.service';
 import GetAllIngestionsDto from './dtos/getAllIngestions.dto';
 import { IngestionEntity } from './entities/ingestion.entity';
 import IngestionStatusEnum from './enums/ingestion.enum';
+import { determineIngestionOutcome } from './helpers/ingestion.helper';
 import { TriggerIngestionResponseType } from './types/response/triggerIngestion.type';
 
 @Injectable()
@@ -32,15 +33,18 @@ export class IngestionService {
     docId: string,
   ): Promise<TriggerIngestionResponseType> {
     try {
-      const document = await this._documentService.findDocumentBy(logger, {
-        where: {
-          id: docId,
-          deletedAt: IsNull(),
+      const document = await this._documentService.findDocumentBy(
+        {
+          where: {
+            id: docId,
+            deletedAt: IsNull(),
+          },
+          select: {
+            userId: true,
+          },
         },
-        select: {
-          userId: true,
-        },
-      });
+        logger,
+      );
 
       if (!document) {
         throw new NotFoundException('Document not found');
@@ -88,9 +92,27 @@ export class IngestionService {
     }
   }
 
-  private simulateProcessing(ingestionId: string, logger: LoggerService): void {
-    // Step 1: Move to PROCESSING after 2 seconds
-    setTimeout(() => {
+  public simulateProcessing(
+    ingestionId: string,
+    logger: LoggerService,
+    options?: {
+      delayFn?: (fn: () => void, delay: number) => void;
+      randomFn?: () => number;
+      processingDelayMs?: number;
+      completionDelayMs?: number;
+      onStatusChange?: (status: IngestionStatusEnum) => void;
+    },
+  ): void {
+    const {
+      delayFn = setTimeout,
+      randomFn = Math.random,
+      processingDelayMs = 2000,
+      completionDelayMs = 3000,
+      onStatusChange,
+    } = options ?? {};
+
+    // Step 1: Transition to PROCESSING
+    delayFn(() => {
       void (async (): Promise<void> => {
         await this._ingestionRepo.update(ingestionId, {
           status: IngestionStatusEnum.PROCESSING,
@@ -103,33 +125,34 @@ export class IngestionService {
           message: `Ingestion ${ingestionId} moved to PROCESSING`,
         });
 
-        // Step 2: Simulate completion/failure after 3 seconds
-        setTimeout(() => {
+        onStatusChange?.(IngestionStatusEnum.PROCESSING);
+
+        // Step 2: Transition to COMPLETED or FAILED
+        delayFn(() => {
           void (async (): Promise<void> => {
-            const success = Math.random() > 0.2;
+            const outcome = determineIngestionOutcome(randomFn);
 
             await this._ingestionRepo.update(ingestionId, {
-              status: success
-                ? IngestionStatusEnum.COMPLETED
-                : IngestionStatusEnum.FAILED,
-              logs: success
-                ? `Completed successfully at ${new Date().toUTCString()}`
-                : `Failed at ${new Date().toUTCString()}`,
-              errorMessage: success ? undefined : 'Simulated ingestion failure',
+              status: outcome.status,
+              logs: outcome.logs,
+              errorMessage: outcome.errorMessage,
               finishedAt: new Date().toUTCString(),
             });
 
             logger.logInfo({
-              action: success ? 'completed' : 'failed',
+              action:
+                outcome.status === IngestionStatusEnum.COMPLETED
+                  ? 'completed'
+                  : 'failed',
               source: 'IngestionService#simulateProcessing',
-              message: `Ingestion ${ingestionId} ended with status: ${
-                success ? 'COMPLETED' : 'FAILED'
-              }`,
+              message: `Ingestion ${ingestionId} ended with status: ${outcome.status}`,
             });
+
+            onStatusChange?.(outcome.status);
           })();
-        }, 3000);
+        }, completionDelayMs);
       })();
-    }, 2000);
+    }, processingDelayMs);
   }
 
   public async getIngestionDetails(
@@ -237,7 +260,6 @@ export class IngestionService {
       documentId,
       userId,
       status,
-      isActive,
       isDeleted,
       hasLogs,
       hasError,
@@ -254,11 +276,11 @@ export class IngestionService {
       const columns = select?.map((field) => `ingestion.${field}`) ?? [
         'ingestion.id',
         'ingestion.status',
-        'ingestion.document_id',
-        'ingestion.user_id',
+        'ingestion.documentId',
+        'ingestion.userId',
         'ingestion.logs',
-        'ingestion.error_message',
-        'ingestion.created_at',
+        'ingestion.errorMessage',
+        'ingestion.createdAt',
       ];
       query.select(columns);
 
@@ -276,10 +298,6 @@ export class IngestionService {
 
       if (status) {
         query.andWhere('ingestion.status IN (:...status)', { status });
-      }
-
-      if (typeof isActive === 'boolean') {
-        query.andWhere('ingestion.is_active = :isActive', { isActive });
       }
 
       if (typeof isDeleted === 'boolean') {
