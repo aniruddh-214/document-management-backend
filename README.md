@@ -1,219 +1,220 @@
 
 # 📄 Document Management Backend
 
-A clean, modular NestJS backend built with TypeORM, JWT authentication, role-based access control, Zod validation, file uploads, simulated ingestion workflows, and full test coverage.
-
-![CI](https://github.com/aniruddh-214/document-management-backend/actions/workflows/build_test_and_coverage.yml/badge.svg)
-![Coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen)
+A **Document Management System (DMS)** built using **NestJS**, providing secure and scalable document operations for three user roles: **Admin**, **Editor**, and **Viewer**. This backend includes **RBAC**, **JWT authentication**, **document uploading**, **ingestion simulation** (no external services), **pagination**, and a complete **developer-friendly setup** for local and Docker-based environments.
 
 ---
 
-## 🚀 Features
+## ✅ Key Features
 
-- 🔐 JWT Auth with role-based access (Admin, Editor, Viewer)
-- 🧾 Document CRUD with file upload (using Streams & Multer)
-- ⚙️ Ingestion job simulation (mocked with `setTimeout`)
-- ✅ Zod-powered request validation
-- 📚 Swagger API docs (`/docs`)
-- 🧪 Unit testing with 100% coverage (reports generated dynamically)
-- 🐳 Docker + Docker Compose ready
-- ⚙️ CI/CD with GitHub Actions
-- 📁 Environment-based configuration (`.env`, test/.env)
+- 👤 **User Roles with RBAC**: `Admin`, `Editor`, `Viewer`
+- 🔐 **JWT-based Authentication** (without Passport)
+- 📄 **Document Upload & Management** for Admins & Editors
+- 🔁 **Document Ingestion Simulation** using `setTimeout`
+- 🧪 **Real DB Testing** with Jest
+- 📚 **Swagger/OpenAPI Documentation** at `/docs`
+- 🧵 **Seeder Script**: Generates 1000+ users, 100K documents, 50K ingestion records
+- 📊 **Pagination** implemented for large datasets
+- 🧱 **Common Entity Template**: Includes `id`, `deleted_at`, timestamps, etc.
+- 🧹 **Weed & Seed** Strategy for clean DB seeding
+- ⚙️ **TypeORM**, **Docker**, **Zod**, **bcryptjs**, custom guards, decorators
 
 ---
 
-## 📐 Entity Relationship Diagram
+## 🔧 Tech Stack
 
+| Layer          | Technology       |
+|----------------|------------------|
+| Framework      | NestJS           |
+| Language       | TypeScript       |
+| Database       | PostgreSQL       |
+| ORM            | TypeORM          |
+| Auth           | JWT (custom)     |
+| Containerization| Docker + Compose|
+| API Docs       | Swagger (OpenAPI)|
+| Testing        | Jest             |
+| Hashing        | bcryptjs         |
+| Validation     | Zod              |
+
+---
+
+## 📁 Environment Variables
+
+All environment variables are defined in `test/.env`.
+
+> 📌 **Note**: Copy the content from `test/.env` and create a new `.env` at the root level. Adjust values as needed for your environment.
+
+---
+
+## ⚙️ Local Development Setup
+
+1. **Create `.env`** at project root by copying from `test/.env`
+2. **Create local PostgreSQL DB** (e.g. `document_db`)
+3. **Update DB credentials** in your `.env`
+4. **Run migrations**:
+
+   ```bash
+   pnpm migrate:run
+   ```
+
+5. **Seed the database** (users, documents, ingestions):
+
+   ```bash
+   pnpm database:seed
+   ```
+
+   * Default Admin Login:
+
+     * Email: `admin@gmail.com`
+     * Password: `Admin@123`
+
+   * Other users:
+
+     * Password: `User@123`
+   * If you want to customize the seeder you can visit the src/scripts/main.ts
+
+6. **Start development server**:
+
+   ```bash
+   pnpm start:dev
+   ```
+
+---
+
+## 🔍 API Access
+
+* **Swagger UI**
+  Access: `http://localhost:<PORT>/docs`
+
+* **Postman Collection**
+  Files available in the `postman/` directory:
+
+  * `DocumentManagement.postman_collection.json`
+  * `DocumentManagement.postman_environment.json`
+
+---
+
+## 🧪 Testing Setup
+
+> ⚠️ This project uses real DB operations during tests. update test/.env accordingly
+
+1. **Setup test database and run migrations**:
+
+   ```bash
+   pnpm test:setup
+   ```
+
+2. **Run tests**:
+
+   ```bash
+   pnpm test
+   ```
+
+---
+
+## 🐳 Running via Docker Compose
+
+1. In `.env`, update:
+
+   ```env
+   DB_HOST=host.docker.internal
+   ```
+
+2. **Start Docker containers** in detached mode:
+
+   ```bash
+   docker compose up -d
+   ```
+
+3. **Stop Docker containers**:
+
+   ```bash
+   docker compose down
+   ```
+
+> ⚠️ Ensure that `.env` is correctly configured before running Docker.
+
+---
+
+## 🗃️ Data Model & Relationships
+
+* **Base Entity**: Common fields like `id`, `deleted_at`, `created_at`, `updated_at`
+* **User**:
+
+  * Has one of three roles: `admin`, `editor`, `viewer`
+  * One user → many documents
+* **Document**:
+
+  * Belongs to an admin/editor
+  * One document → many ingestion records
+* **Ingestion**:
+
+  * Each ingestion is triggered by a user
+  * Simulated with async `setTimeout`
+
+---
+
+## 🌱 Seeder Scripts
+
+This project uses a **weed and seed strategy**:
+
+* **Clear & repopulate** database using:
+
+  ```bash
+  pnpm database:seed
+  ```
+
+* **Run any individual TS script**:
+
+  ```bash
+  pnpm shell src/scripts/main.ts
+  ```
+
+> 📌 Seeder generates large datasets — useful for pagination and performance testing.
+
+---
+
+## 📂 Folder Structure (Tree)
+
+To view the project structure on **Windows**, run from the root directory:
+
+```cmd
+tree /F > structure.txt
 ```
 
-┌────────┐       1       ┌────────────┐       1       ┌──────────────┐
-│  User  ├──────────────►│  Document  ├──────────────►│  Ingestion   │
-└────────┘               └────────────┘               └──────────────┘
-
-User owns multiple Documents.
-Each Document can have multiple Ingestion jobs.
-Each Ingestion job also links back to the triggering User.
-
-````
+This will save the folder structure to `structure.txt`.
 
 ---
 
-## 🧱 Project Structure
+## 🔐 Role Capabilities
 
-```plaintext
-src/
-├── auth/        → Handles login, registration, JWT logic
-├── user/        → Manages user roles and permissions
-├── document/    → CRUD for documents and file uploads
-├── ingestion/   → Simulates ingestion with setTimeout logic
-├── common/      → Reusable enums, base entities, utils
-│   ├── entities/
-│   ├── enums/
-│   └── utils/
-├── main.ts      → Application bootstrap
-test/
-├── .env         → Reference .env for test/dev setup
-test_reports/
-├── coverage/    → Jest HTML + LCOV coverage output
-````
+| Role   | Upload | Ingest | View |
+| ------ | ------ | ------ | ---- |
+| Admin  | ✅      | ✅      | ✅    |
+| Editor | ✅      | ✅      | ✅    |
+| Viewer | ❌      | ❌      | ✅    |
+
+> Ingestion is available **only** to Admins and Editors via protected REST API routes.
 
 ---
 
-## 📚 Swagger API Docs
+## 🧠 Notes
 
-All routes are documented and testable using Swagger:
-
-📍 `http://localhost:3000/docs`
-
----
-
-## 🧪 Testing
-
-* 💯 **100% Unit Test Coverage** using [Jest](https://jestjs.io/)
-* **Coverage reports** exported to `test_reports/coverage/`
-* LCOV + HTML formats supported
-
-### 🧪 Run Tests Locally
-
-```bash
-pnpm test
-pnpm test:cov
-```
-
-### 🧪 Coverage Report Preview
-
-After running `pnpm test:cov`, open:
-
-```
-test_reports/coverage/lcov-report/index.html
-```
+* No service buses or microservices are used
+* All ingestion simulation is done via `setTimeout` internally
+* Project uses **custom decorators**, **guards**, and **DTOs** for clean, maintainable code
+* Follows clean code architecture principles
 
 ---
 
-## ⚙️ GitHub Actions CI/CD
+## 📘 Scripts Summary
 
-GitHub Actions automatically runs tests and verifies 100% test coverage on every PR or push.
-
-### `.github/workflows/ci.yml`
-
-```yaml
-name: CI
-
-on: [push, pull_request]
-
-jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-      - run: pnpm install
-      - run: pnpm build
-      - run: pnpm test
-      - run: pnpm test:cov
-```
-
-📁 `test_reports/` is created dynamically and can be uploaded as a GitHub artifact or viewed locally.
-
----
-
-## 🐳 Docker Setup
-
-### 1️⃣ Create `.env`
-
-```env
-DB_HOST=host.docker.internal
-DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=postgres
-DB_NAME=document_db
-JWT_SECRET=your_secret_key
-PORT=3000
-```
-
-> ✅ Use `host.docker.internal` to access host DB from Docker containers (works on Mac, Windows, Linux)
-
----
-
-### 2️⃣ Docker Compose Commands
-
-Start everything:
-
-```bash
-docker-compose up --build -d
-```
-
-Stop & clean up:
-
-```bash
-docker-compose down
-```
-
-Clean volumes + networks:
-
-```bash
-docker-compose down -v --remove-orphans
-```
-
----
-
-### 🛠️ Sample `docker-compose.yml`
-
-```yaml
-version: '3.8'
-
-services:
-  app:
-    build: .
-    container_name: document_backend
-    ports:
-      - '3000:3000'
-    env_file:
-      - .env
-    depends_on:
-      - postgres
-
-  postgres:
-    image: postgres:15
-    container_name: document_postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: document_db
-    ports:
-      - '5432:5432'
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
-```
-
----
-
-## 🧭 REST vs GraphQL
-
-We chose **REST API** for these reasons:
-
-* Simpler CRUD implementation
-* Easy to manage authentication, roles, and security
-* Efficient and cache-friendly
-* Lower operational complexity for the current scope
-
-> GraphQL may be introduced later for advanced querying/filtering.
-
----
-
-## 🔮 Future Roadmap
-
-* 🧠 Add Redis-based caching
-* 🚦 Implement global rate limiting (e.g. `@nestjs/throttler`)
-* 🔐 Add OAuth integrations (Google, GitHub, etc.)
-* 📨 Introduce service bus (e.g., RabbitMQ or Kafka)
-* ⚙️ Convert to microservices with dedicated workers for ingestion
-
----
-
+| Command                | Description                              |
+| ---------------------- | ---------------------------------------- |
+| `pnpm start:dev`       | Start development server                 |
+| `pnpm migrate:run`     | Run DB migrations                        |
+| `pnpm database:seed`   | Weed + seed users, documents, ingestions |
+| `pnpm test:setup`      | Setup DB for tests                       |
+| `pnpm test`            | Run all tests                            |
+| `pnpm shell <file.ts>` | Run individual TypeScript file manually  |
 

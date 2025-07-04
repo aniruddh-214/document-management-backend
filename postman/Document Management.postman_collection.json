@@ -1,1085 +1,966 @@
 {
-	"info": {
-		"_postman_id": "23840cae-7ab0-4dbe-a71e-3a45eac457ac",
-		"name": "Document Management",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "43454392",
-		"_collection_link": "https://aniruddhpostman.postman.co/workspace/Aniruddh-Postman's-Workspace~e12cf0ff-2f51-4d41-8356-5112cf75ae03/collection/43454392-23840cae-7ab0-4dbe-a71e-3a45eac457ac?action=share&source=collection_link&creator=43454392"
-	},
-	"item": [
-		{
-			"name": "Auth",
-			"item": [
-				{
-					"name": "Register",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"fullName\": \"kailash Kher\",\r\n    \"email\": \"kailash@gmail.com\",\r\n    \"password\": \"User@123\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{url}}/auth/register",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"auth",
-								"register"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Login",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Parse response JSON\r",
-									"const response = pm.response.json();\r",
-									"\r",
-									"// Check if accessToken exists in data\r",
-									"if (response && response.data && response.data.accessToken) {\r",
-									"  // Save token to environment variable named 'jwt_token'\r",
-									"  pm.environment.set('user_token', response.data.accessToken);\r",
-									"  console.log('JWT token saved to environment variable: jwt_token');\r",
-									"} else {\r",
-									"  console.warn('accessToken not found in response');\r",
-									"}\r",
-									""
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"Prakash@gmail.com\",\r\n    \"password\": \"User@123\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{url}}/auth/login",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"auth",
-								"login"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Admin Login",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Parse response JSON\r",
-									"const response = pm.response.json();\r",
-									"\r",
-									"// Check if accessToken exists in data\r",
-									"if (response && response.data && response.data.accessToken) {\r",
-									"  // Save token to environment variable named 'jwt_token'\r",
-									"  pm.environment.set('admin_token', response.data.accessToken);\r",
-									"  console.log('JWT token saved to environment variable: jwt_token');\r",
-									"} else {\r",
-									"  console.warn('accessToken not found in response');\r",
-									"}\r",
-									""
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"admin@gmail.com\",\r\n    \"password\": \"Admin@123\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{url}}/auth/login",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"auth",
-								"login"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Logout",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Parse response JSON\r",
-									"const response = pm.response.json();\r",
-									"\r",
-									"// Check if accessToken exists in data\r",
-									"if (response && response.data && response.data.accessToken) {\r",
-									"  // Save token to environment variable named 'jwt_token'\r",
-									"  pm.environment.set('jwt_token', response.data.accessToken);\r",
-									"  console.log('JWT token saved to environment variable: jwt_token');\r",
-									"} else {\r",
-									"  console.warn('accessToken not found in response');\r",
-									"}\r",
-									""
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{url}}/auth/logout",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"auth",
-								"logout"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Profile",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{url}}/auth/profile",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"auth",
-								"profile"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Users",
-			"item": [
-				{
-					"name": "Get All Users",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{url}}/user/all",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"user",
-								"all"
-							],
-							"query": [
-								{
-									"key": "fullName",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "email",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "role",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "isActive",
-									"value": "false",
-									"disabled": true
-								},
-								{
-									"key": "select",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "page",
-									"value": "1",
-									"disabled": true
-								},
-								{
-									"key": "limit",
-									"value": "1",
-									"disabled": true
-								},
-								{
-									"key": "sortOrder",
-									"value": "ASC",
-									"disabled": true
-								},
-								{
-									"key": "isDeleted",
-									"value": "true",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get User By Id",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{url}}/user/:id",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"user",
-								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": "9e8790f2-d47c-47dd-a7ae-cf905ff7a3eb"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update User Role",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"role\": \"editor\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{url}}/user/:id",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"user",
-								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": "9e8790f2-d47c-47dd-a7ae-cf905ff7a3eb"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete User",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "DELETE",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{url}}/user/:id",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"user",
-								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": "9e8790f2-d47c-47dd-a7ae-cf905ff7a3eb"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get User Documents",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{url}}/user/me/documents?id=9e8790f2-d47c-47dd-a7ae-cf905ff7a3eb",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"user",
-								"me",
-								"documents"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "9e8790f2-d47c-47dd-a7ae-cf905ff7a3eb"
-								},
-								{
-									"key": "sortOrder",
-									"value": "ASC",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Document",
-			"item": [
-				{
-					"name": "Upload",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "document",
-									"type": "file",
-									"src": "/C:/Users/user/Downloads/Nest JS Exercise.docx"
-								},
-								{
-									"key": "title",
-									"value": "Title",
-									"type": "text"
-								},
-								{
-									"key": "description",
-									"value": "A brif as description",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{url}}/document/upload",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"document",
-								"upload"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "document",
-									"type": "file",
-									"src": "/C:/Users/user/Downloads/John Doe's CV.pdf"
-								},
-								{
-									"key": "title",
-									"value": "Something",
-									"type": "text",
-									"disabled": true
-								},
-								{
-									"key": "description",
-									"value": "Hello",
-									"type": "text",
-									"disabled": true
-								}
-							]
-						},
-						"url": {
-							"raw": "{{url}}/document/:id/update",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"document",
-								":id",
-								"update"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": "089241ec-688a-492e-ad9f-94a34b3d0714"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Download",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "document",
-									"type": "file",
-									"src": "/C:/Users/user/Downloads/Nest JS Exercise.docx"
-								},
-								{
-									"key": "title",
-									"value": "Test",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{url}}/document/:id/download",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"document",
-								":id",
-								"download"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": "b5ac37c9-5cd6-4cdf-88be-6b261f34f07d"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Document Details",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{url}}/document/:id",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"document",
-								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": "b5ac37c9-5cd6-4cdf-88be-6b261f34f07d"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Document",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{url}}/document/:id/delete",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"document",
-								":id",
-								"delete"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": "089241ec-688a-492e-ad9f-94a34b3d0714"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get All Documents",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{url}}/document/all",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"document",
-								"all"
-							],
-							"query": [
-								{
-									"key": "limit",
-									"value": "5",
-									"disabled": true
-								},
-								{
-									"key": "title",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "mimeType",
-									"value": "open",
-									"disabled": true
-								},
-								{
-									"key": "isActive",
-									"value": "false",
-									"disabled": true
-								},
-								{
-									"key": "documentStatus",
-									"value": "pending",
-									"disabled": true
-								},
-								{
-									"key": "select",
-									"value": "userId",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Ingestion",
-			"item": [
-				{
-					"name": "Trigger",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{url}}/ingestion/:id/trigger",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"ingestion",
-								":id",
-								"trigger"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": "c76187ad-52d7-431f-b9d7-4c1f58cd1374"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Ingestion Details",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{url}}/ingestion/:id/details",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"ingestion",
-								":id",
-								"details"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": "f8059a3d-53fa-4b2e-a783-2a8a6c709938"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Ingestion",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{url}}/ingestion/:id/delete",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"ingestion",
-								":id",
-								"delete"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": "500c26bb-ca8d-4cd6-b841-27322eedd3a2"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get All Ingestions",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{url}}/ingestion/all",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"ingestion",
-								"all"
-							],
-							"query": [
-								{
-									"key": "documentId",
-									"value": "1829b084-946a-4ba0-a235-67f021dc0302",
-									"disabled": true
-								},
-								{
-									"key": "id",
-									"value": "0cfd92e7-c957-4113-b853-b168a5a333b7",
-									"disabled": true
-								},
-								{
-									"key": "userId",
-									"value": "1c01ccaf-5ccd-40cb-9283-55feb2bbb4c6",
-									"disabled": true
-								},
-								{
-									"key": "status",
-									"value": "completed",
-									"disabled": true
-								},
-								{
-									"key": "hasLogs",
-									"value": "true",
-									"disabled": true
-								},
-								{
-									"key": "hasError",
-									"value": "true",
-									"disabled": true
-								},
-								{
-									"key": "isActive",
-									"value": "false",
-									"disabled": true
-								},
-								{
-									"key": "isDeleted",
-									"value": "true",
-									"disabled": true
-								},
-								{
-									"key": "page",
-									"value": "2",
-									"disabled": true
-								},
-								{
-									"key": "limit",
-									"value": "1",
-									"disabled": true
-								},
-								{
-									"key": "status",
-									"value": "failed",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Hello World",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "",
-							"type": "string"
-						}
-					]
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{url}}",
-					"host": [
-						"{{url}}"
-					],
-					"query": [
-						{
-							"key": "documentId",
-							"value": "1829b084-946a-4ba0-a235-67f021dc0302",
-							"disabled": true
-						},
-						{
-							"key": "id",
-							"value": "0cfd92e7-c957-4113-b853-b168a5a333b7",
-							"disabled": true
-						},
-						{
-							"key": "userId",
-							"value": "1c01ccaf-5ccd-40cb-9283-55feb2bbb4c6",
-							"disabled": true
-						},
-						{
-							"key": "status",
-							"value": "completed",
-							"disabled": true
-						},
-						{
-							"key": "hasLogs",
-							"value": "true",
-							"disabled": true
-						},
-						{
-							"key": "hasError",
-							"value": "true",
-							"disabled": true
-						},
-						{
-							"key": "isActive",
-							"value": "false",
-							"disabled": true
-						},
-						{
-							"key": "isDeleted",
-							"value": "true",
-							"disabled": true
-						},
-						{
-							"key": "page",
-							"value": "2",
-							"disabled": true
-						},
-						{
-							"key": "limit",
-							"value": "1",
-							"disabled": true
-						}
-					]
-				}
-			},
-			"response": []
-		}
-	]
+  "info": {
+    "_postman_id": "23840cae-7ab0-4dbe-a71e-3a45eac457ac",
+    "name": "Document Management",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "43454392",
+    "_collection_link": "https://aniruddhpostman.postman.co/workspace/Aniruddh-Postman's-Workspace~e12cf0ff-2f51-4d41-8356-5112cf75ae03/collection/43454392-23840cae-7ab0-4dbe-a71e-3a45eac457ac?action=share&source=collection_link&creator=43454392"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"fullName\": \"kailash Kher\",\r\n    \"email\": \"kailash@gmail.com\",\r\n    \"password\": \"User@123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/auth/register",
+              "host": ["{{url}}"],
+              "path": ["auth", "register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Parse response JSON\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "// Check if accessToken exists in data\r",
+                  "if (response && response.data && response.data.accessToken) {\r",
+                  "  // Save token to environment variable named 'jwt_token'\r",
+                  "  pm.environment.set('user_token', response.data.accessToken);\r",
+                  "  console.log('JWT token saved to environment variable: jwt_token');\r",
+                  "} else {\r",
+                  "  console.warn('accessToken not found in response');\r",
+                  "}\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"Prakash@gmail.com\",\r\n    \"password\": \"User@123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/auth/login",
+              "host": ["{{url}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Parse response JSON\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "// Check if accessToken exists in data\r",
+                  "if (response && response.data && response.data.accessToken) {\r",
+                  "  // Save token to environment variable named 'jwt_token'\r",
+                  "  pm.environment.set('admin_token', response.data.accessToken);\r",
+                  "  console.log('JWT token saved to environment variable: jwt_token');\r",
+                  "} else {\r",
+                  "  console.warn('accessToken not found in response');\r",
+                  "}\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"admin@gmail.com\",\r\n    \"password\": \"Admin@123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/auth/login",
+              "host": ["{{url}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Parse response JSON\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "// Check if accessToken exists in data\r",
+                  "if (response && response.data && response.data.accessToken) {\r",
+                  "  // Save token to environment variable named 'jwt_token'\r",
+                  "  pm.environment.set('jwt_token', response.data.accessToken);\r",
+                  "  console.log('JWT token saved to environment variable: jwt_token');\r",
+                  "} else {\r",
+                  "  console.warn('accessToken not found in response');\r",
+                  "}\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/auth/logout",
+              "host": ["{{url}}"],
+              "path": ["auth", "logout"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [""],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/auth/profile",
+              "host": ["{{url}}"],
+              "path": ["auth", "profile"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [""],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/user/all",
+              "host": ["{{url}}"],
+              "path": ["user", "all"],
+              "query": [
+                {
+                  "key": "fullName",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "email",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "role",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "isActive",
+                  "value": "false",
+                  "disabled": true
+                },
+                {
+                  "key": "select",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "ASC",
+                  "disabled": true
+                },
+                {
+                  "key": "isDeleted",
+                  "value": "true",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User By Id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [""],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/user/:id",
+              "host": ["{{url}}"],
+              "path": ["user", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "9e8790f2-d47c-47dd-a7ae-cf905ff7a3eb"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Role",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [""],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"role\": \"editor\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/user/:id",
+              "host": ["{{url}}"],
+              "path": ["user", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "9e8790f2-d47c-47dd-a7ae-cf905ff7a3eb"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [""],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/user/:id",
+              "host": ["{{url}}"],
+              "path": ["user", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "9e8790f2-d47c-47dd-a7ae-cf905ff7a3eb"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Documents",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/user/me/documents?id=9e8790f2-d47c-47dd-a7ae-cf905ff7a3eb",
+              "host": ["{{url}}"],
+              "path": ["user", "me", "documents"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "9e8790f2-d47c-47dd-a7ae-cf905ff7a3eb"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "ASC",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Document",
+      "item": [
+        {
+          "name": "Upload",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "document",
+                  "type": "file",
+                  "src": "/C:/Users/user/Downloads/Nest JS Exercise.docx"
+                },
+                {
+                  "key": "title",
+                  "value": "Title",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "A brif as description",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{url}}/document/upload",
+              "host": ["{{url}}"],
+              "path": ["document", "upload"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "document",
+                  "type": "file",
+                  "src": "/C:/Users/user/Downloads/John Doe's CV.pdf"
+                },
+                {
+                  "key": "title",
+                  "value": "Something",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "description",
+                  "value": "Hello",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{url}}/document/:id/update",
+              "host": ["{{url}}"],
+              "path": ["document", ":id", "update"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "089241ec-688a-492e-ad9f-94a34b3d0714"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Download",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "document",
+                  "type": "file",
+                  "src": "/C:/Users/user/Downloads/Nest JS Exercise.docx"
+                },
+                {
+                  "key": "title",
+                  "value": "Test",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{url}}/document/:id/download",
+              "host": ["{{url}}"],
+              "path": ["document", ":id", "download"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "b5ac37c9-5cd6-4cdf-88be-6b261f34f07d"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Document Details",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/document/:id",
+              "host": ["{{url}}"],
+              "path": ["document", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "b5ac37c9-5cd6-4cdf-88be-6b261f34f07d"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Document",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/document/:id/delete",
+              "host": ["{{url}}"],
+              "path": ["document", ":id", "delete"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "089241ec-688a-492e-ad9f-94a34b3d0714"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Documents",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/document/all",
+              "host": ["{{url}}"],
+              "path": ["document", "all"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "5",
+                  "disabled": true
+                },
+                {
+                  "key": "title",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "mimeType",
+                  "value": "open",
+                  "disabled": true
+                },
+                {
+                  "key": "isActive",
+                  "value": "false",
+                  "disabled": true
+                },
+                {
+                  "key": "documentStatus",
+                  "value": "pending",
+                  "disabled": true
+                },
+                {
+                  "key": "select",
+                  "value": "userId",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Ingestion",
+      "item": [
+        {
+          "name": "Trigger",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/ingestion/:id/trigger",
+              "host": ["{{url}}"],
+              "path": ["ingestion", ":id", "trigger"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "c76187ad-52d7-431f-b9d7-4c1f58cd1374"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Ingestion Details",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/ingestion/:id/details",
+              "host": ["{{url}}"],
+              "path": ["ingestion", ":id", "details"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "f8059a3d-53fa-4b2e-a783-2a8a6c709938"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Ingestion",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/ingestion/:id/delete",
+              "host": ["{{url}}"],
+              "path": ["ingestion", ":id", "delete"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "500c26bb-ca8d-4cd6-b841-27322eedd3a2"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Ingestions",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/ingestion/all",
+              "host": ["{{url}}"],
+              "path": ["ingestion", "all"],
+              "query": [
+                {
+                  "key": "documentId",
+                  "value": "1829b084-946a-4ba0-a235-67f021dc0302",
+                  "disabled": true
+                },
+                {
+                  "key": "id",
+                  "value": "0cfd92e7-c957-4113-b853-b168a5a333b7",
+                  "disabled": true
+                },
+                {
+                  "key": "userId",
+                  "value": "1c01ccaf-5ccd-40cb-9283-55feb2bbb4c6",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "completed",
+                  "disabled": true
+                },
+                {
+                  "key": "hasLogs",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "hasError",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "isActive",
+                  "value": "false",
+                  "disabled": true
+                },
+                {
+                  "key": "isDeleted",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "2",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "failed",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Hello World",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}",
+          "host": ["{{url}}"],
+          "query": [
+            {
+              "key": "documentId",
+              "value": "1829b084-946a-4ba0-a235-67f021dc0302",
+              "disabled": true
+            },
+            {
+              "key": "id",
+              "value": "0cfd92e7-c957-4113-b853-b168a5a333b7",
+              "disabled": true
+            },
+            {
+              "key": "userId",
+              "value": "1c01ccaf-5ccd-40cb-9283-55feb2bbb4c6",
+              "disabled": true
+            },
+            {
+              "key": "status",
+              "value": "completed",
+              "disabled": true
+            },
+            {
+              "key": "hasLogs",
+              "value": "true",
+              "disabled": true
+            },
+            {
+              "key": "hasError",
+              "value": "true",
+              "disabled": true
+            },
+            {
+              "key": "isActive",
+              "value": "false",
+              "disabled": true
+            },
+            {
+              "key": "isDeleted",
+              "value": "true",
+              "disabled": true
+            },
+            {
+              "key": "page",
+              "value": "2",
+              "disabled": true
+            },
+            {
+              "key": "limit",
+              "value": "1",
+              "disabled": true
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
 }
