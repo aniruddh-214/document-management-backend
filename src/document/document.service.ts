@@ -77,16 +77,16 @@ export class DocumentService {
         action: 'error',
         message: 'Error while saving document to the database',
         source: 'DocumentService#createDocument',
-        errorMessage: error?.message || 'Unknown error',
+        errorMessage: error?.message,
       });
 
-      throw new InternalServerErrorException('Failed to create document');
+      throw error;
     }
   }
 
   public async findDocumentBy(
-    logger: LoggerService,
     conditions: FindOneOptions<DocumentEntity>,
+    logger: LoggerService,
   ): Promise<DocumentEntity | null> {
     logger.logInfo({
       action: 'info',
@@ -112,7 +112,7 @@ export class DocumentService {
         action: 'error',
         message: 'Error while fetching document from the database',
         source: 'DocumentService#findDocumentBy',
-        errorMessage: error?.message || 'Unknown error',
+        errorMessage: error?.message,
       });
 
       throw new InternalServerErrorException('Failed to fetch document');
@@ -179,9 +179,7 @@ export class DocumentService {
         errorMessage: error?.message,
       });
 
-      throw error instanceof NotFoundException
-        ? error
-        : new InternalServerErrorException('Failed to update document');
+      throw error;
     }
   }
 
@@ -190,19 +188,22 @@ export class DocumentService {
     logger: LoggerService,
   ): Promise<{ stream: fs.ReadStream; mimeType: string; filename: string }> {
     try {
-      const document = await this.findDocumentBy(logger, {
-        where: {
-          id,
-          deletedAt: IsNull(),
+      const document = await this.findDocumentBy(
+        {
+          where: {
+            id,
+            deletedAt: IsNull(),
+          },
+          select: {
+            filePath: true,
+            mimeType: true,
+            title: true,
+          },
         },
-        select: {
-          filePath: true,
-          mimeType: true,
-          title: true,
-        },
-      });
+        logger,
+      );
 
-      if (!document?.filePath) {
+      if (!document) {
         throw new NotFoundException(`Document with id ${id} not found`);
       }
       const { mimeType, title, filePath } = document;
@@ -221,7 +222,7 @@ export class DocumentService {
 
       return {
         stream,
-        mimeType: mimeType || 'application/octet-stream',
+        mimeType: mimeType,
         filename: title + path.extname(absolutePath),
       };
     } catch (error) {
@@ -237,7 +238,6 @@ export class DocumentService {
   public async getDocumentDetailsById(
     id: string,
     logger: LoggerService,
-    throwIfNotFound = true,
   ): Promise<DocumentEntity> {
     try {
       const document = await this._documentRepo.findOne({
@@ -257,9 +257,10 @@ export class DocumentService {
         },
       });
 
-      if (!document || throwIfNotFound) {
+      if (!document) {
         throw new NotFoundException(`Document with id ${id} not found`);
       }
+
       logger.logInfo({
         action: 'info',
         message: `found document details for id: ${id}`,
@@ -300,19 +301,10 @@ export class DocumentService {
 
       const dbUpdateTask = this._documentRepo.softDelete({ id: document.id });
 
-      const [fileResult, dbResult] = await Promise.allSettled([
+      const [, dbResult] = await Promise.allSettled([
         fileDeleteTask(),
         dbUpdateTask,
       ]);
-
-      if (fileResult.status === 'rejected') {
-        logger.logWarn({
-          action: 'warn',
-          message: 'File delete failed (non-blocking)',
-          source: 'DocumentService#deleteDocumentFile',
-          errorMessage: fileResult.reason?.message,
-        });
-      }
 
       if (dbResult.status === 'rejected' || dbResult.value.affected === 0) {
         throw new Error('Failed to update document metadata');

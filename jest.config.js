@@ -31,11 +31,17 @@ const config = {
   ],
 
   collectCoverage: true,
-  collectCoverageFrom: ['<rootDir>/src/**/*.{ts,js}'],
+  collectCoverageFrom: [
+    '<rootDir>/src/**/*.{ts,js}',
+    '!<rootDir>/src/**/*.spec.ts',
+    '!src/scripts/**',
+    '!src/main.ts',
+  ],
 
   coverageReporters: [
     'html',
     'text',
+    'lcov',
     'text-summary',
     'json',
     'clover',
@@ -44,7 +50,13 @@ const config = {
 
   coverageDirectory: '<rootDir>/test_reports/',
 
-  coveragePathIgnorePatterns: ['<rootDir>/src/main.ts', '<rootDir>/src/types'],
+  coveragePathIgnorePatterns: [
+    '<rootDir>/src/main.ts',
+    '<rootDir>/src/types',
+    '<rootDir>/src/migrations',
+  ],
+
+  testEnvironment: 'node',
 
   coverageThreshold: {
     global: {
@@ -56,7 +68,7 @@ const config = {
   },
 
   // Optional global setup/teardown
-  // globalSetup: '<rootDir>/test/seedFixture.ts',
+  globalSetup: '<rootDir>/test/preTestSetup.ts',
   // globalTeardown: '<rootDir>/test/weedFixture.ts',
 };
 

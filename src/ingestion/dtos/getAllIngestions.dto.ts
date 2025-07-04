@@ -20,7 +20,6 @@ export default class GetAllIngestionsDto {
   public userId?: string;
   public status?: IngestionStatusEnum[];
 
-  public isActive?: boolean;
   public isDeleted?: boolean;
 
   public hasLogs?: boolean;

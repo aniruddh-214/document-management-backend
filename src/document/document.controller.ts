@@ -147,11 +147,7 @@ export class DocumentController {
     @Param() param: GetDocumentRequestParamType,
     @Req() req: Request,
   ): Promise<Partial<DocumentEntity> | null> {
-    return this.documentService.getDocumentDetailsById(
-      param.id,
-      req.logger,
-      true,
-    );
+    return this.documentService.getDocumentDetailsById(param.id, req.logger);
   }
 
   @Delete(':id/delete')

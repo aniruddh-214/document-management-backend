@@ -1,0 +1,49 @@
+# Node modules (will be installed inside container)
+node_modules
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Environment files (if you don't want to copy your local .env)
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+*.log.*
+
+# Docker files (to avoid recursive copy)
+Dockerfile*
+docker-compose*.yml
+
+# Git files
+.git
+.gitignore
+
+# Editor files
+.vscode
+.idea
+*.sublime-workspace
+*.sublime-project
+
+# Build output
+dist
+build
+out
+
+logs
+
+test
+
+# Test coverage and reports
+test_reports
+uploads
+coverage
+.nyc_output
+report
+
+# Misc
+*.swp
+*.DS_Store

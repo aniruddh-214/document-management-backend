@@ -30,7 +30,7 @@ export const typeOrmConfig: DataSourceOptions = {
     connectionTimeoutMillis: 2000,
   },
 
-  maxQueryExecutionTime: 1000, //if query take   1 second then console
+  maxQueryExecutionTime: 2000, //if query take 2 second then console
 };
 
 const AppDataSource = new DataSource(typeOrmConfig);

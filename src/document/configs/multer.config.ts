@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import * as fs from 'fs';
 import { extname, join } from 'path';
 
@@ -5,26 +6,26 @@ import { BadRequestException } from '@nestjs/common';
 import { Request } from 'express';
 import { diskStorage } from 'multer';
 
+export const multerDestination = (req, file, cb): void => {
+  const userId = req.user.sub;
+  const uploadPath = join(process.cwd(), 'uploads', userId);
+
+  fs.mkdir(uploadPath, { recursive: true }, (err) => {
+    if (err) {
+      return cb(err, '');
+    }
+    cb(null, uploadPath);
+  });
+};
+
+export const multerFilename = (req, file, cb): void => {
+  const ext = extname(file.originalname).toLowerCase();
+  cb(null, `${Date.now()}${ext}`);
+};
+
 export const multerStorage = diskStorage({
-  destination: (req, file, cb) => {
-    const userId = req.user.sub;
-
-    // Build absolute path: projectRoot/uploads/userId
-    const uploadPath = join(process.cwd(), 'uploads', userId);
-
-    // Check if folder exists, if not create it
-    fs.mkdir(uploadPath, { recursive: true }, (err) => {
-      if (err) {
-        return cb(err, '');
-      }
-      cb(null, uploadPath);
-    });
-  },
-
-  filename: (req, file, cb) => {
-    const ext = extname(file.originalname).toLowerCase();
-    cb(null, `${Date.now()}${ext}`);
-  },
+  destination: multerDestination,
+  filename: multerFilename,
 });
 
 const allowedMimeTypes = [

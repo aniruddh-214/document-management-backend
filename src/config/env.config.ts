@@ -10,10 +10,16 @@ const serverConfig = z.object({
   JWT_SECRET: z.string(),
   JWT_EXPIRY_TIME: z.string(),
   NODE_ENV: z
-    .enum(['development', 'staging', 'production'])
+    .enum(['test', 'development', 'staging', 'production'])
     .default('development'),
-  PORT: z.number(),
-  SHOW_CONSOLE_LOG: z.coerce.boolean().default(true),
+  PORT: z.preprocess((val: string) => {
+    if (typeof val === 'string' && /^\d+$/.test(val)) {
+      return Number(val);
+    }
+    return;
+  }, z.number().default(3000)),
+
+  SHOW_CONSOLE_LOG: z.boolean().default(false),
 });
 
 const envVariables = {
@@ -28,9 +34,9 @@ const envVariables = {
   JWT_EXPIRY_TIME: process.env.JWT_EXPIRY_TIME,
 
   NODE_ENV: process.env.NODE_ENV,
-  PORT: process.env.PORT ? +process.env.PORT : undefined,
+  PORT: process.env.PORT,
 
-  SHOW_CONSOLE_LOG: process.env.SHOW_CONSOLE_LOG,
+  SHOW_CONSOLE_LOG: process.env.SHOW_CONSOLE_LOG === 'true' ? true : false,
 };
 
 type ServerConfig = z.infer<typeof serverConfig>;

@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './app.controller';
@@ -24,6 +24,9 @@ import { AppShutdownService } from './utils/application.shutdown';
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(LoggerMiddleware).forRoutes('*');
+    consumer
+      .apply(LoggerMiddleware)
+      .exclude({ path: 'favicon.ico', method: RequestMethod.GET })
+      .forRoutes('*');
   }
 }
