@@ -58,7 +58,7 @@ jobs:
 
       - name: Run tests shard ${{ matrix.shard }}
         run: |
-          pnpm test -- --maxWorkers=1 --runInBand --testPathPattern= --shard=${{ matrix.shard }}/3
+          pnpm test -- --shard=${{ matrix.shard }}/3
 
       - name: Upload test coverage reports shard ${{ matrix.shard }}
         uses: actions/upload-artifact@v4
